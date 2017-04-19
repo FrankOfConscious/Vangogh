@@ -2,7 +2,7 @@ package Server;
 
 public class KeyTuple<A,B,C,D> {
 	/** <p>Title: TwoTuple</p>
-	 * <p>Description: ����Ԫ�ص�Ԫ�飬������һ�������ﷵ���������͵�ֵ</p>
+	 * <p>Description: 三个元素的元组，用于在一个方法里返回两种类型的值</p>
 	 */
 
 	    private final String key1;
@@ -18,7 +18,7 @@ public class KeyTuple<A,B,C,D> {
 	        this.obj = obj;
 	    
 	}
-	    boolean ifOverwrites(KeyTuple old){
+	    boolean ifOverwrites(KeyTuple old){//比较三个primary key，如果都相同，则返回true否则返回false。都相同需要overwrites操作
 	    	if(this.key1.equals(old.getOwner())
 	    			&& this.key2.equals(old.getChannel())
 	    			&& this.key3.equals(old.getUri()))
@@ -27,7 +27,7 @@ public class KeyTuple<A,B,C,D> {
 	    	
 	    }
 	    
-	    boolean ifduplicated(KeyTuple old){
+	    boolean ifduplicated(KeyTuple old){//比较 channel 和uri 是否都相同，如果都相同则返回true，说明违反了publish的倒数第三条规则
 	    	if(this.key2.equals(old.getChannel())
 	    			&& this.key3.equals(old.getUri()))
 	    		return true;
