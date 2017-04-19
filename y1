@@ -1,0 +1,9 @@
+去掉字符串首位空格和里面的\0
+  public static String method(String a ){
+		
+		String b=a.replaceAll("\\s*", "");
+		 b=b.replace("\0", "");
+		return b;
+	}
+  
+  
