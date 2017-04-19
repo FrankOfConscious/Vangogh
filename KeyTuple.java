@@ -26,7 +26,7 @@ public class KeyTuple<A,B,C,D> {
 	    	else return false;
 	    	
 	    }
-	    
+	    //如果要比较的话，需要给command和resource转换成KeyTuple，但是command里面不含obj啊
 	    boolean ifduplicated(KeyTuple old){//比较 channel 和uri 是否都相同，如果都相同则返回true，说明违反了publish的倒数第三条规则
 	    	if(this.key2.equals(old.getChannel())
 	    			&& this.key3.equals(old.getUri()))
