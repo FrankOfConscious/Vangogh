@@ -2,14 +2,13 @@ package Server;
 
 public class KeyTuple<A,B,C,D> {
 	/** <p>Title: TwoTuple</p>
-	 * <p>Description: ä¸‰ä¸ªå…ƒç´ çš„å…ƒç»„ï¼Œç”¨äºåœ¨ä¸€ä¸ªæ–¹æ³•é‡Œè¿”å›ä¸¤ç§ç±»å‹çš„å€¼</p>
-
+	 * <p>Description: Èı¸öÔªËØµÄÔª×é£¬ÓÃÓÚÔÚÒ»¸ö·½·¨Àï·µ»ØÁ½ÖÖÀàĞÍµÄÖµ</p>
 	 */
 
-	    public final String key1;
-	    public final String key2;
-	    public final String key3;
-	    public Resource obj;
+	    private final String key1;
+	    private final String key2;
+	    private final String key3;
+	    private Resource obj;
 	    
 	     
 	    KeyTuple(Resource obj) {
@@ -19,5 +18,32 @@ public class KeyTuple<A,B,C,D> {
 	        this.obj = obj;
 	    
 	}
+	    boolean ifOverwrites(KeyTuple old){
+	    	if(this.key1.equals(old.getOwner())
+	    			&& this.key2.equals(old.getChannel())
+	    			&& this.key3.equals(old.getUri()))
+	    		return true;
+	    	else return false;
+	    	
+	    }
+	    
+	    boolean ifduplicated(KeyTuple old){
+	    	if(this.key2.equals(old.getChannel())
+	    			&& this.key3.equals(old.getUri()))
+	    		return true;
+	    	else return false;
+	    }
+	    
+	    String getOwner(){
+	    	return this.key1;
+	    }
+	    String getChannel(){
+	    	return this.key2;
+	    }
+	    String getUri(){
+	    	return this.key3;
+	    }
+	    
+	    
 
 }
