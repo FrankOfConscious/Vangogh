@@ -56,20 +56,41 @@ public class Math {
 	
 	private static JSONObject publishJSON(JSONObject command) {
 		JSONObject result = new JSONObject();
-		if (!command.containsKey("resource") ||
-				!((JSONObject) command.get("resource")).containsKey("names") || 
-				!((JSONObject) command.get("resource")).containsKey("tags")) {
+		if(!command.containsKey("resource")||
+				!((HashMap) command.get("resource")).containsKey("owner")||
+				!((HashMap) command.get("resource")).containsKey("channel")||
+				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
 			return result;
-		}
-		if (command.get("owner").equals("*")) {
+		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
 			return result;
+		} else if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("http")) {
+			//this if clause check if the file scheme is "file"
+			result.put("response", "error");
+			result.put("errorMessage", "cannot publish resource");
+			return result;
+		} else {
+			for (int i = 0; i < Server.resourceList.size(); i++) {
+				//this if clause check if there is resource with same channel and uri but different owner
+				if (Server.resourceList.get(i).ifduplicated(command)) {
+					result.put("response", "error");
+					result.put("errorMessage", "cannot publish resource");
+					return result;
+				}
+				//this checks if there is resource with same channel, uri and owner, replace the obj
+				if (Server.resourceList.get(i).ifOverwrites(command)) {
+					Server.resourceList.get(i).overwrites(command);
+					result.put("response", "success");
+					return result;
+				}	
+			}
+			Server.resourceList.add(new KeyTuple(new Resource(command)));
+			result.put("response", "success");
 		}
-		//other rules are not defined, should be added later
-		return command;	
+		return result;
 	}
 	
 	private static JSONObject removeJSON(JSONObject command){
