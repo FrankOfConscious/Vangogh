@@ -22,6 +22,7 @@ public class KeyTuple<A,B,C,D> {
 	        this.obj = obj;
 	    
 	}
+	//如果两个tuple的key1，2，3都相同，则用新的obj替换原本keytuple中的obj
 	    boolean ifOverwrites(KeyTuple old){
 	    	if(this.key1.equals(old.getOwner())
 	    			&& this.key2.equals(old.getChannel())
@@ -38,7 +39,7 @@ public class KeyTuple<A,B,C,D> {
 	    	else return false;
 	    	
 	    }
-	    
+	    //如果两个tuple channel，uri一样，但owner不同，则报错
 	    boolean ifduplicated(KeyTuple old){
 	    	if(this.key2.equals(old.getChannel())
 	    			&& this.key3.equals(old.getUri()))
