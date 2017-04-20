@@ -62,7 +62,9 @@ public class KeyTuple<A,B,C,D> {
 	    String getUri(){
 	    	return this.key3;
 	    }
-	    
+	    Resource getObj(){
+	    	return this.obj;
+	    }	    
 	    
 
 }
