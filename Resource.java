@@ -50,9 +50,8 @@ class Resource {
 		return b;	
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(checker("   abcd  "));
-	
+        String[] getTags(){
+		return this.tags;
 	}
 	
 	
