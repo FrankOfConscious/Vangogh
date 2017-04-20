@@ -7,12 +7,12 @@ class Resource {
 	private String name="";
 	private String description="";
 	private String[] tags=null;
-	private String EZserver;
+	private String ezserver;
 	
 	//用来存储server里创建的Resource obj
 	private static ArrayList<Resource> resourceList = new ArrayList<Resource>();
 	
-	public Resource(String name, String description, String[] tags, String uri, String channel, String owner, String EZserver){
+	public Resource(String name, String description, String[] tags, String uri, String channel, String owner, String ezserver){
 		this.name=checker(name);
 		this.description=checker(description);
 		int num=tags.length;
@@ -21,7 +21,7 @@ class Resource {
 		this.uri=checker(uri);
 		this.channel=checker(channel);
 		this.owner=checker(owner);
-		this.EZserver=checker(EZserver);	
+		this.ezserver=checker(ezserver);	
 	}
 	//输入JSONObject，建成的Resource和上面一个方法类似
 	public Resource(JSONObject json) {
@@ -63,7 +63,7 @@ class Resource {
 			case "uri":return uri;
 			case "name":return name;
 			case "description":return description;
-			case "EZserver": return EZserver; 
+			case "EZserver": return ezserver; 
 			default: return null;
 			
 		}
