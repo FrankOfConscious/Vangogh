@@ -9,6 +9,9 @@ class Resource {
 	private String[] tags=null;
 	private String EZserver;
 	
+	//用来存储server里创建的Resource obj
+	private static ArrayList<Resource> resourceList = new ArrayList<Resource>();
+	
 	public Resource(String name, String description, String[] tags, String uri, String channel, String owner, String EZserver){
 		this.name=checker(name);
 		this.description=checker(description);
@@ -29,6 +32,10 @@ class Resource {
 		this.channel = checker((String) json.get("channel"));
 		this.owner = checker((String) json.get("owner"));
 		this.ezserver = checker((String)json.get("ezserver"));
+	}
+	//根据command创建Resource，并将其存储在resourceList里
+	public static void createResource(JSONObject command) {
+		resourceList.add(new Resource(command));
 	}
 	
 	public void update(Resource obj, String username ){
