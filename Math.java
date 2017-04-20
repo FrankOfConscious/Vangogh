@@ -108,7 +108,7 @@ public class Math {
 			result.put("errorMessage", "invalid resource");
 			return result;
 		} else {
-			//this checks whether 
+			//this checks whether the secret is correct
 			boolean eligible = false;
 			for (int i = 0; i < Server.secretList.size(); i++) {
 				if (Server.secretList.get(i) == command.get("secret")) {
@@ -132,7 +132,7 @@ public class Math {
 				//this if clause check if there is resource with same channel and uri but different owner
 				if (Server.resourceList.get(i).ifduplicated(command)) {
 					result.put("response", "error");
-					result.put("errorMessage", "cannot publish resource");
+					result.put("errorMessage", "cannot share resource");
 					return result;
 				}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
