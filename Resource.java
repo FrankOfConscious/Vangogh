@@ -20,6 +20,17 @@ class Resource {
 		this.owner=checker(owner);
 		this.EZserver=checker(EZserver);	
 	}
+	//输入JSONObject，建成的Resource和上面一个方法类似
+	public Resource(JSONObject json) {
+		this.name = checker((String) json.get("name"));
+		this.tags = (String[])((HashMap)json.get("resource")).get("tags");
+		this.description = checker((String) json.get("description"));
+		this.uri= checker((String) json.get("uri"));
+		this.channel = checker((String) json.get("channel"));
+		this.owner = checker((String) json.get("owner"));
+		this.ezserver = checker((String)json.get("ezserver"));
+	}
+	
 	public void update(Resource obj, String username ){
 		
 		
