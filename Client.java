@@ -7,7 +7,6 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -28,12 +27,12 @@ class Client {
 		Options options = new Options();
 		AddOptions(options);
 
-		// 接受commandline里面的参数
+		// accept args from commandline
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = null;
 
 		try {
-			cmd = parser.parse(options, args);// 传参
+			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -45,19 +44,12 @@ class Client {
 			System.exit(0);
 		}
 		
-		//System.out.println(command.toJSONString());
-		
-		// -----------
-		// ...and connect to a server socket
+		//  connect to a server socket
 		try (Socket socket = new Socket(ip, port)) {
 
 			// Get I/O streams for connection
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-
-			// Write something on outgoing stream and send it through
-			//output.writeUTF("I want to connect!");
-			//output.flush();
 					
 			if (cmd.hasOption("publish")) {
 				JSONPublish(cmd,output,input);
@@ -75,7 +67,7 @@ class Client {
 			
 			try {
 				String message = input.readUTF();
-				System.out.println(message);//确定连接
+				System.out.println(message);
 			} catch (IOException e) {
 				System.out.println("Server seems to have closed connection.");
 			}
@@ -84,12 +76,13 @@ class Client {
 		}
 	}
 	
-	private static void JSONFetch(CommandLine cmd, DataOutputStream output, DataInputStream input) {
+	private static void JSONFetch(CommandLine command, DataOutputStream output, DataInputStream input) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	private static void JSONExchange(CommandLine command, DataOutputStream output, DataInputStream input) {
+		// TODO Auto-generated method stub
 		
 	}
 
@@ -132,29 +125,6 @@ class Client {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-	}
-
-	public static void AddOptions(Options options){
-		options.addOption("PORT", true, "Server port");
-		options.addOption("IP", true, "Server IP address");
-		options.addOption("channel", true, "channel");
-		options.addOption("debug", false, "print debug information");
-		options.addOption("description", true, "resource description");
-		options.addOption("exchange", false, "exchange server list with server");
-		options.addOption("fetch", false, "fetch resources from server");
-		options.addOption("name", true, "resource name");
-		options.addOption("owner", true, "owner");
-		options.addOption("publish", false, "publish resource on server");
-		options.addOption("query", false, "query for resources from server");
-		options.addOption("remove", false, "remove resource from server");
-		options.addOption("secret", true, "secret");
-		options.addOption("servers", true, "server list");
-		options.addOption("share", false, "share resource on server");
-		options.addOption("tags", true, "resource tags");
-		options.addOption("uri", true, "resource URI");
-		options.addOption("host", true, "server host");
-		options.addOption("port", true, "server port");
 		
 	}
 		
@@ -301,8 +271,26 @@ class Client {
 
 	}
 
-
-
-	
+	public static void AddOptions(Options options){
+		options.addOption("PORT", true, "Server port");
+		options.addOption("IP", true, "Server IP address");
+		options.addOption("channel", true, "channel");
+		options.addOption("debug", false, "print debug information");
+		options.addOption("description", true, "resource description");
+		options.addOption("exchange", false, "exchange server list with server");
+		options.addOption("fetch", false, "fetch resources from server");
+		options.addOption("name", true, "resource name");
+		options.addOption("owner", true, "owner");
+		options.addOption("publish", false, "publish resource on server");
+		options.addOption("query", false, "query for resources from server");
+		options.addOption("remove", false, "remove resource from server");
+		options.addOption("secret", true, "secret");
+		options.addOption("servers", true, "server list");
+		options.addOption("share", false, "share resource on server");
+		options.addOption("tags", true, "resource tags");
+		options.addOption("uri", true, "resource URI");
+		options.addOption("host", true, "server host");
+		
+	}
 	
 }
