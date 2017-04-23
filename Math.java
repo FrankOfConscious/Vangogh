@@ -223,6 +223,58 @@ public class Math {
 		
 	}
 	
+	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output) {
+		JSONArray result = new JSONArray();
+		JSONObject obj = new JSONObject();
+		if (!command.containsKey("resourceTemplate")) {
+			obj.put("response", "error");
+			obj.put("errorMessage", "missing resourceTemplate");
+			result.add(obj);
+			return result;
+		}	
+		String channel = (String) ((HashMap) command.get("resourceTemplate")).get("channel");
+		String uri = (String) ((HashMap) command.get("resourceTemplate")).get("uri");
+		for (int i = 0; i < Server.resourceList.size(); i++) {
+			
+			if (Server.resourceList.get(i).getChannel().equals(channel) &&
+					Server.resourceList.get(i).getUri().equals(uri)) {
+				//if the command matches a KeyTuple storeed in the server, the obj in that KeyTuple will be returned
+				File f = new File(Server.resourceList.get(i).getUri());
+				if (f.exists()) {
+					JSONObject obj1 = new JSONObject();
+					JSONObject obj2 = Server.resourceList.get(i).toJSON();
+					JSONObject obj3 = new JSONObject();
+					
+					obj1.put("response", "success");
+					obj2.put("resourceSize", f.length());
+					obj3.put("resultSize", 1);
+					result.add(obj1);
+					result.add(obj2);
+					result.add(obj3);
+					try{
+						RandomAccessFile byteFile = new RandomAccessFile(f, "r");
+						byte[] sendingBuffer = new byte[1024*1024];
+						int num;
+						while((num = byteFile.read(sendingBuffer))>0) {
+							output.write(Arrays.copyOf(sendingBuffer, num));
+						}
+						byteFile.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return result;
+				}
+				
+			}
+		}
+		
+		obj.put("response", "error");
+		obj.put("errorMessage", "invalid resourceTemplate");
+		result.add(obj);
+		return result;
+		
+	}
+
 	private static JSONArray removeJSON(JSONObject command){
 		JSONObject result= new JSONObject();
 		JSONArray array=new JSONArray();
