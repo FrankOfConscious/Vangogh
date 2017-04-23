@@ -217,19 +217,22 @@ public class Math {
 		
 	}
 	
-	private static JSONObject removeJSON(JSONObject command){
+	private static JSONArray removeJSON(JSONObject command){
 		JSONObject result= new JSONObject();
+		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
 				!((HashMap) command.get("resource")).containsKey("owner")||
 				!((HashMap) command.get("resource")).containsKey("channel")||
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
-			return result;
+			array.add(result);
+			return array;
 		}else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
-			return result;
+			array.add(result);
+			return array;
 		}else {
 			boolean removed=false;
 			for(int i=0;i<Server.resourceList.size();i++){
@@ -246,12 +249,13 @@ public class Math {
 				result.put("response", "error");
 				result.put("errorMessage", "cannot remove resource");	
 			}
-			return result;
+			array.add(result);
+			return array;
 			
 		}
 			
 		}
-		private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
+	private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
 		// TODO Auto-generated method stub
 		boolean[] rules=new boolean[7];
 		rules[0]=Tuple.getChannel().equals(((HashMap) command.get("resource")).get("channel"));
