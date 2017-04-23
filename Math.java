@@ -182,4 +182,44 @@ public class Math {
 		}
 			
 		}
+		private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
+		// TODO Auto-generated method stub
+		boolean[] rules=new boolean[7];
+		rules[0]=Tuple.getChannel().equals(((HashMap) command.get("resource")).get("channel"));
+		if(!rules[0]) return false;
+		rules[1]=Tuple.getOwner().equals("")||Tuple.getOwner().equals(((HashMap) command.get("resource")).get("owner"));
+		if(!rules[1]) return false;
+		rules[2]=true;
+		for(int j=0;j<((String[]) ((HashMap) command.get("resource")).get("tags")).length;j++){
+			if(!Arrays.asList(Tuple.getObj().getTags()).contains(((String[])((HashMap) command.get("resource")).get("tags"))[j])){
+				rules[2]=false;
+				return false;
+			}
+		}
+		if(!((HashMap) command.get("resource")).containsKey("uri")) rules[3]=true;
+		else if(((HashMap) command.get("resource")).get("uri").equals("")) rules[3]=true;
+		else {
+			if(((HashMap) command.get("resource")).get("uri").equals(Tuple.getUri())) rules[3]=true;
+			else return false;
+		}
+		if(!((HashMap) command.get("resource")).containsKey("name")) rules[4]=true;
+		else if(((HashMap) command.get("resource")).get("name").equals("")) rules[4]=true;
+		else {
+			if(   Tuple.getObj().get("name").contains(  (String) ((HashMap) command.get("resource")).get("name")     )  ) rules[4]=true;
+			else rules[4]= false;
+		}
+		if(!((HashMap) command.get("resource")).containsKey("description")) rules[5]=true;
+		else if(((HashMap) command.get("resource")).get("description").equals("")) rules[5]=true;
+		else {
+			if(   Tuple.getObj().get("description").contains(  (String) ((HashMap) command.get("resource")).get("description")     )  ) rules[4]=true;
+			else rules[5]= false;
+		}
+		
+		if(((HashMap) command.get("resource")).containsKey("name")&&
+				((HashMap) command.get("resource")).containsKey("description")) rules[6]=true;
+		else rules[6]=false;
+		
+		if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;
+		else return false;
+	}
 	}
