@@ -99,8 +99,8 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
+			return array;
 		}
-		return array;
 	}
 	
 	private static JSONArray shareJSON(JSONObject command) {
@@ -161,9 +161,10 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
+			return array;
 		}
-		return array;
 	}
+	
 	private static JSONArray queryJSON(JSONObject command){	
 		int resultSize=0;
 		ArrayList<KeyTuple> tempList=new ArrayList<KeyTuple>();
