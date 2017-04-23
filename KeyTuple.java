@@ -76,6 +76,12 @@ public class KeyTuple<A,B,C,D> {
 	    	obj.put("ezserver", this.getObj().get("ezserver"));
 	    	return obj;
 	    }
+	 
+	    void overwrites(JSONObject command) {
+	    	this.obj = new Resource(command);
+	    }
+	
+	
 	    
 
 }
