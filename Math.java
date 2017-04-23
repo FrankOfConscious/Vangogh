@@ -20,7 +20,7 @@ public class Math {
 		
 	}
 	
-	public static JSONArray parseCommand(JSONObject command, DataOutputStream outpur) {
+	public static JSONArray parseCommand(JSONObject command, DataOutputStream output) {
 		JSONArray result = new JSONArray();
 		
 		//this solves generic response
