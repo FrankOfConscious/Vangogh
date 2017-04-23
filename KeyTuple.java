@@ -43,7 +43,10 @@ public class KeyTuple<A,B,C,D> {
 	    String getUri(){
 	    	return this.key3;
 	    }
-	    
+	
+	    void overwrites(JSONObject command) {
+	    	this.obj = new Resource(command);
+	    }
 	    
 
 }
