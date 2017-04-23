@@ -97,8 +97,9 @@ public class Math {
 		return result;
 	}
 	
-	private static JSONObject shareJSON(JSONObject command) {
+	private static JSONArray shareJSON(JSONObject command) {
 		JSONObject result = new JSONObject();
+		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
 				!command.containsKey("secret") ||
 				!((HashMap) command.get("resource")).containsKey("owner")||
@@ -106,11 +107,13 @@ public class Math {
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource and\\/or secret");
-			return result;
+			array.add(result);
+			return array;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
-			return result;
+			array.add(result);
+			return array;
 		} else {
 			//this checks whether the secret is correct
 			boolean eligible = false;
@@ -122,7 +125,8 @@ public class Math {
 			if (!eligible) {
 				result.put("response", "error");
 				result.put("errorMessage", "incorrect secret");
-				return result;
+				array.add(result);
+				return array;
 			}
 		}
 		//this if clause check if the file scheme is "file"
@@ -130,26 +134,29 @@ public class Math {
 				((String)((HashMap) command.get("resource")).get("uri")).charAt(0) == '/') {
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
-			return result;
+			array.add(result);
+			return array;
 		} else {
 			for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
 				if (Server.resourceList.get(i).ifduplicated(command)) {
 					result.put("response", "error");
 					result.put("errorMessage", "cannot share resource");
-					return result;
+					array.add(result);
+					return array;
 				}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
 				if (Server.resourceList.get(i).ifOverwrites(command)) {
 					Server.resourceList.get(i).overwrites(command);
 					result.put("response", "success");
-					return result;
+					array.add(result);
+					return array;
 				}	
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
 		}
-		return result;
+		return array;
 	}
 	private static JSONArray queryJSON(JSONObject command){	
 		int resultSize=0;
