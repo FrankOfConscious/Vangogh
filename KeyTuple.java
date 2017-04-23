@@ -65,15 +65,15 @@ public class KeyTuple<A,B,C,D> {
 	    Resource getObj(){
 	    	return this.obj;
 	    }
-	    JSONObject TupleToJSON(KeyTuple tuple){
+	    JSONObject toJSON(){
 	    	JSONObject obj=new JSONObject();
-	    	obj.put("name", tuple.getObj().get("name"));
-	    	obj.put("tags", tuple.getObj().getTags());
-	    	obj.put("description", tuple.getObj().get("description"));
-	    	obj.put("uri", tuple.getObj().get("uri"));
-	    	obj.put("channel", tuple.getObj().get("channel"));
-	    	obj.put("owner", tuple.getObj().get("owner"));
-	    	obj.put("ezserver", tuple.getObj().get("ezserver"));
+	    	obj.put("name", this.getObj().get("name"));
+	    	obj.put("tags", this.getObj().getTags());
+	    	obj.put("description", this.getObj().get("description"));
+	    	obj.put("uri", this.getObj().get("uri"));
+	    	obj.put("channel", this.getObj().get("channel"));
+	    	obj.put("owner", this.getObj().get("owner"));
+	    	obj.put("ezserver", this.getObj().get("ezserver"));
 	    	return obj;
 	    }
 	    
