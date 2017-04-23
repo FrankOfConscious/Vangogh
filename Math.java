@@ -20,36 +20,40 @@ public class Math {
 		
 	}
 	
-	public static JSONObject parseCommand(JSONObject command, DataOutputStream outpur) {
-		JSONObject result = new JSONObject();
+	public static JSONArray parseCommand(JSONObject command, DataOutputStream outpur) {
+		JSONArray result = new JSONArray();
 		
 		//this solves generic response
 		if (command.containsKey("command")) {
 			switch((String) command.get("command")) {
 			//each case handles more explicit situation
 			case "PUBLISH":
-				publishJSON(command);
+				result=publishJSON(command);
 				break;
-			case "REMOVE":removeJSON(command);
+			case "REMOVE":result=removeJSON(command);
 				break;
-			case "SHARE":
+			case "SHARE":result=shareJSON(command);
 				break;
-			case "QUERY":
+			case "QUERY":result=queryJSON(command);
 				break;
-			case "FETCH":
+			case "FETCH":result=fetchJSON(command);
 				break;
-			case "EXCHANGE":
+			case "EXCHANGE":result=exchangeJSON(command);
 				break;
 			default:
 				//return invalid command
-				result.put("response", "error");
-				result.put("errorMessage", "invalid command");
+				JSONObject obj=new JSONObject();
+				obj.put("response", "error");
+				obj.put("errorMessage", "invalid command");
+				result.add(obj);
 				break;
 			}
 		} else {
 			//return missing or incorrect type
-			result.put("response", "error");
-			result.put("errorMessage", "missing or incorrect type for command");
+			JSONObject obj=new JSONObject();
+			obj.put("response", "error");
+			obj.put("errorMessage", "missing or incorrect type for command");
+			result.add(obj);
 		}
 		return result;
 	}
