@@ -147,6 +147,64 @@ public class Math {
 		}
 		return result;
 	}
+	private static JSONArray queryJSON(JSONObject command){	
+		int resultSize=0;
+		ArrayList<KeyTuple> tempList=new ArrayList<KeyTuple>();
+		if(command.containsKey("resource")&&command.containsKey("secret")){
+			if(((HashMap) command.get("resource")).get("owner").equals("*")){
+				JSONObject obj=new JSONObject();
+				obj.put("response", "error");
+				obj.put("errorMessage", "invalid resourceTemplate");
+				JSONArray result=new JSONArray();
+				result.add(obj);
+				return result;
+			}else{
+				for(int i=0;i<Server.resourceList.size();i++){
+					if(queryMatch(Server.resourceList.get(i),command)){
+						tempList.add(Server.resourceList.get(i));
+					}
+				}
+			}
+			
+		}else{
+			JSONObject obj=new JSONObject();
+			obj.put("response", "error");
+			obj.put("errorMessage", "missing resourceTemplate");
+			JSONArray result=new JSONArray();
+			result.add(obj);
+			return result;
+		}
+		if(tempList.size()==0){
+			JSONObject obj=new JSONObject();
+			JSONObject obj2=new JSONObject();
+			obj.put("response", "success");
+			obj2.put("resultSize", 0);
+			JSONArray result=new JSONArray();
+			result.add(obj);
+			result.add(obj2);
+			return result;
+		}else{
+			for(int i=0;i<Server.resourceList.size();i++){
+				if(queryMatch(Server.resourceList.get(i),command))
+					tempList.add(Server.resourceList.get(i));
+			}
+			JSONArray result=new JSONArray();
+			JSONObject obj=new JSONObject();
+			obj.put("response", "success");
+			result.add(obj);
+			for(int i=0;i<tempList.size();i++){
+				result.add(tempList.get(i).toJSON());
+			}
+			obj=new JSONObject();
+			obj.put("resultsize", tempList.size());
+			result.add(obj);
+			return result;
+			
+		}
+		
+		
+		
+	}
 	
 	private static JSONObject removeJSON(JSONObject command){
 		JSONObject result= new JSONObject();
