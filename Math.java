@@ -41,13 +41,13 @@ public class Math {
 			switch((String) command.get("command")) {
 			//each case handles more explicit situation
 			case "PUBLISH":
-				publishJSON(command);
+				publishJSON(command, output);
 				break;
 			case "REMOVE":
-				removeJSON(command);
+				removeJSON(command, output);
 				break;
 			case "SHARE":
-				shareJSON(command);
+				shareJSON(command, output);
 				break;
 			case "QUERY":
 				break;
@@ -71,71 +71,52 @@ public class Math {
 		return result;
 	}
 	
-	/*private static JSONObject publishJSON(JSONObject command) {
+	private static void publishJSON(JSONObject command, DataOutputStream output) throws IOException {
 		JSONObject result = new JSONObject();
-		if ()
-		if (!command.containsKey("resource") ||
-				!((JSONObject) command.get("resource")).containsKey("names") || 
-				!((JSONObject) command.get("resource")).containsKey("tags")) {
-			result.put("response", "error");
-			result.put("errorMessage", "missing resource");
-			return result;
-		}
-		if (command.get("owner").equals("*")) {
-			result.put("response", "error");
-			result.put("errorMessage", "invalid resource");
-			return result;
-		}
-		//other rules are not defined, should be added later
-		return command;	
-	}*/
-	
-	private static JSONArray publishJSON(JSONObject command) {
-		JSONObject result = new JSONObject();
-		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
 				!((HashMap) command.get("resource")).containsKey("owner")||
 				!((HashMap) command.get("resource")).containsKey("channel")||
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
-			array.add(result);
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
-			array.add(result);
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		} else if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("http")) {
 			//this if clause check if the file scheme is "file"
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
-			array.add(result);
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		} else {
 			for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
 				if (Server.resourceList.get(i).ifduplicated(command)) {
 					result.put("response", "error");
 					result.put("errorMessage", "cannot publish resource");
-					array.add(result);
-					return array;
+					output.writeUTF(result.toJSONString());
+					return;
 				}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
-				if (Server.resourceList.get(i).ifOverwrites(command)) {
+				else if (Server.resourceList.get(i).ifOverwrites(command)) {
 					Server.resourceList.get(i).overwrites(command);
 					result.put("response", "success");
-					array.add(result);
-					return array;
+					output.writeUTF(result.toJSONString());
+					return;
 				}	
 			}
+			
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
-			return array;
+			return;
 		}
 	}
 	
-	private static JSONArray shareJSON(JSONObject command) {
+	private static void shareJSON(JSONObject command, DataOutputStream output) throws IOException {
 		JSONObject result = new JSONObject();
 		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
@@ -145,26 +126,27 @@ public class Math {
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource and\\/or secret");
-			array.add(result);
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
-			array.add(result);
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		} else {
 			//this checks whether the secret is correct
 			boolean eligible = false;
 			for (int i = 0; i < Server.secretList.size(); i++) {
 				if (Server.secretList.get(i) == command.get("secret")) {
 					eligible = true;
+					break;
 				}
 			}
 			if (!eligible) {
 				result.put("response", "error");
 				result.put("errorMessage", "incorrect secret");
-				array.add(result);
-				return array;
+				output.writeUTF(result.toJSONString());
+				return;
 			}
 		}
 		//this if clause check if the file scheme is "file"
@@ -172,33 +154,34 @@ public class Math {
 				((String)((HashMap) command.get("resource")).get("uri")).charAt(0) == '/') {
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
-			array.add(result);
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		} else {
 			for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
 				if (Server.resourceList.get(i).ifduplicated(command)) {
 					result.put("response", "error");
 					result.put("errorMessage", "cannot share resource");
-					array.add(result);
-					return array;
+					output.writeUTF(result.toJSONString());
+					return;
 				}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
 				if (Server.resourceList.get(i).ifOverwrites(command)) {
 					Server.resourceList.get(i).overwrites(command);
 					result.put("response", "success");
-					array.add(result);
-					return array;
+					output.writeUTF(result.toJSONString());
+					return;
 				}	
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
-			return array;
+			output.writeUTF(result.toJSONString());
+			return;
 		}
 	}
 	
 	
-	private static JSONObject removeJSON(JSONObject command){
+	private static void removeJSON(JSONObject command, DataOutputStream output) throws IOException{
 		JSONObject result= new JSONObject();
 		if(!command.containsKey("resource")||
 				!((HashMap) command.get("resource")).containsKey("owner")||
@@ -206,38 +189,43 @@ public class Math {
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
-			return result;
+			output.writeUTF(result.toJSONString());
+			return;
 		}else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
-			return result;
+			output.writeUTF(result.toJSONString());
+			return;
 		}else {
 			boolean removed=false;
 			for(int i=0;i<Server.resourceList.size();i++){
 				if(Server.resourceList.get(i).ifOverwrites(command)){
 					Server.resourceList.remove(i);
 					result.put("response", "success");
-					removed=true;
-					break;
+					output.writeUTF(result.toJSONString());
+					return;
 				}	
 			}
+			
 			if(!removed){
 				result.put("response", "error");
-				result.put("errorMessage", "cannot remove resource");	
+				result.put("errorMessage", "cannot remove resource");
+				output.writeUTF(result.toJSONString());
+				return;
 			}
-			return result;
 		}
 	}
 	
-	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output) {
-		JSONArray result = new JSONArray();
+	private static void fetchJSON(JSONObject command, DataOutputStream output) throws IOException {
 		JSONObject obj = new JSONObject();
 		if (!command.containsKey("resourceTemplate")) {
 			obj.put("response", "error");
 			obj.put("errorMessage", "missing resourceTemplate");
-			result.add(obj);
-			return result;
-		}	
+			output.writeUTF(obj.toJSONString());
+			return;
+
+		}
+		
 		String channel = (String) ((HashMap) command.get("resourceTemplate")).get("channel");
 		String uri = (String) ((HashMap) command.get("resourceTemplate")).get("uri");
 		for (int i = 0; i < Server.resourceList.size(); i++) {
@@ -247,16 +235,10 @@ public class Math {
 				//if the command matches a KeyTuple storeed in the server, the obj in that KeyTuple will be returned
 				File f = new File(Server.resourceList.get(i).getUri());
 				if (f.exists()) {
-					JSONObject obj1 = new JSONObject();
-					JSONObject obj2 = Server.resourceList.get(i).toJSON();
-					JSONObject obj3 = new JSONObject();
-					
-					obj1.put("response", "success");
-					obj2.put("resourceSize", f.length());
-					obj3.put("resultSize", 1);
-					result.add(obj1);
-					result.add(obj2);
-					result.add(obj3);
+					obj.put("response", "success");
+					obj.put("resourceSize", f.length());
+					obj.put("resultSize", 1);
+					output.writeUTF(obj.toJSONString());
 					try{
 						RandomAccessFile byteFile = new RandomAccessFile(f, "r");
 						byte[] sendingBuffer = new byte[1024*1024];
@@ -268,17 +250,15 @@ public class Math {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					return result;
-				}
-				
+					return;
+				}	
 			}
 		}
 		
 		obj.put("response", "error");
 		obj.put("errorMessage", "invalid resourceTemplate");
-		result.add(obj);
-		return result;
-		
+		output.writeUTF(obj.toJSONString());
+		return;
 	}
 
 }
