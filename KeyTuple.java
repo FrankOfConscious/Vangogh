@@ -47,7 +47,8 @@ public class KeyTuple<A,B,C,D> {
 	    }
 	    boolean ifduplicated(JSONObject command){
 	    	if(this.key2.equals(((HashMap) command.get("resource")).get("channel"))
-	    			&& this.key3.equals(((HashMap) command.get("resource")).get("uri")))
+	    			&& this.key3.equals(((HashMap) command.get("resource")).get("uri"))
+	    			&&!this.key1.equals(((HashMap) command.get("resource")).get("owner")))
 	    		return true;
 	    	else return false;
 	    }

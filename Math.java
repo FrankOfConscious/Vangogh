@@ -95,7 +95,7 @@ public class Math {
 					||  (((String)((HashMap) command.get("resource")).get("uri")).length()>=7 
 					&& !((String)((HashMap) command.get("resource")).get("uri")).substring(0, 7).equals("file://"))
 					){
-			//	System.out.println("i am in if");
+				System.out.println("i am in if");
 				
 				for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
@@ -108,14 +108,18 @@ public class Math {
 				//this checks if there is resource with same channel, uri and owner, replace the obj
 					if (Server.resourceList.get(i).ifOverwrites(command)) {
 						Server.resourceList.get(i).overwrites(command);
-						result.put("response", "success");
+						result.put("response", "success(overwrites)");
 						array.add(result);
 						return array;
 				}	
-				//	System.out.println("in for");
+					System.out.println("in for");
 			}
 			
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
+			System.out.println("resourceList:"+Server.resourceList.size());
+			for(int k=0;k<Server.resourceList.size();k++){
+				System.out.println(Server.resourceList.get(k).getUri());
+			}
 			result.put("response", "success");
 			array.add(result);
 			return array;
@@ -346,13 +350,23 @@ public class Math {
 		boolean[] rules=new boolean[7];
 		rules[0]=Tuple.getChannel().equals(((HashMap) command.get("resourceTemplate")).get("channel"));
 		if(!rules[0]) return false;
-		rules[1]=Tuple.getOwner().equals("")||Tuple.getOwner().equals(((HashMap) command.get("resourceTemplate")).get("owner"));
+		rules[1]= (((HashMap) command.get("resourceTemplate")).get("owner")).equals("") ||Tuple.getOwner().equals("")||Tuple.getOwner().equals(((HashMap) command.get("resourceTemplate")).get("owner"));
 		if(!rules[1]) return false;
 		rules[2]=true;
-		for(int j=0;j<((String[]) ((HashMap) command.get("resourceTemplate")).get("tags")).length;j++){
-			if(!Arrays.asList(Tuple.getObj().getTags()).contains(((String[])((HashMap) command.get("resourceTemplate")).get("tags"))[j])){
+		if( !((HashMap) command.get("resourceTemplate")).get("tags").equals("")){
+			if(Tuple.getObj().getTags()==null) {
 				rules[2]=false;
 				return false;
+			}
+			else{
+				String[] tempTags=( (String) ((HashMap) command.get("resourceTemplate")).get("tags")).split(",");
+		
+				for(int j=0;j<tempTags.length;j++){
+					if(!Arrays.asList(Tuple.getObj().getTags()).contains(tempTags[j])){
+						rules[2]=false;
+						return false;
+					}
+				}
 			}
 		}
 		if(!((HashMap) command.get("resourceTemplate")).containsKey("uri")) rules[3]=true;
@@ -361,21 +375,21 @@ public class Math {
 			if(((HashMap) command.get("resourceTemplate")).get("uri").equals(Tuple.getUri())) rules[3]=true;
 			else return false;
 		}
-		if(!((HashMap) command.get("resourceTemplate")).containsKey("name")) rules[4]=true;
-		else if(((HashMap) command.get("resourceTemplate")).get("name").equals("")) rules[4]=true;
+		if(!((HashMap) command.get("resourceTemplate")).containsKey("name")) rules[4]=false;
+		else if(((HashMap) command.get("resourceTemplate")).get("name").equals("")) rules[4]=false;
 		else {
 			if(   Tuple.getObj().get("name").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("name")     )  ) rules[4]=true;
 			else rules[4]= false;
 		}
-		if(!((HashMap) command.get("resourceTemplate")).containsKey("description")) rules[5]=true;
-		else if(((HashMap) command.get("resourceTemplate")).get("description").equals("")) rules[5]=true;
+		if(!((HashMap) command.get("resourceTemplate")).containsKey("description")) rules[5]=false;
+		else if(((HashMap) command.get("resourceTemplate")).get("description").equals("")) rules[5]=false;
 		else {
-			if(   Tuple.getObj().get("description").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("description")     )  ) rules[4]=true;
+			if(   Tuple.getObj().get("description").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("description")     )  ) rules[5]=true;
 			else rules[5]= false;
 		}
 		
-		if(((HashMap) command.get("resourceTemplate")).containsKey("name")&&
-				((HashMap) command.get("resourceTemplate")).containsKey("description")) rules[6]=true;
+		if((!((HashMap) command.get("resourceTemplate")).containsKey("name"))&&
+				(!((HashMap) command.get("resourceTemplate")).containsKey("description"))) rules[6]=true;
 		else rules[6]=false;
 		
 		if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;

@@ -31,7 +31,8 @@ class Resource {
 	//输入JSONObject，建成的Resource和上面一个方法类似
 	public Resource(JSONObject json) {
 		this.name = checker((String) ((HashMap) json.get("resource")).get("name"));
-		this.tags = (String[]) ((HashMap) json.get("resource")).get("tags");
+		if(((HashMap) json.get("resource")).get("tags").equals("")) this.tags=null;
+		else this.tags = (String[]) ((String) ((HashMap) json.get("resource")).get("tags")).split(",");
 		this.description = checker((String) ((HashMap) json.get("resource")).get("description"));
 		this.uri= checker((String) ((HashMap) json.get("resource")).get("uri"));
 		this.channel = checker((String) ((HashMap) json.get("resource")).get("channel"));

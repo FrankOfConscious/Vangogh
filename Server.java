@@ -50,7 +50,7 @@ import org.json.simple.parser.ParseException;
 		
 		// Identifies the user number connected
 		private static int counter = 0;
-		static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
+		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
 		static String secret = "";
 
 

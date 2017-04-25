@@ -17,6 +17,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import Server.Server;
+
 @SuppressWarnings("unused")
 class Client {
 	private static String ip;
@@ -73,7 +75,12 @@ class Client {
 					while(true){
 						if(input.available()>0){
 						String message = input.readUTF();
-						System.out.println(message);}
+						System.out.println(message);
+						int a=Server.resourceList.size();
+						for(int i =0;i<a;i++){
+						System.out.println(Server.resourceList.get(i).toString());
+						}
+					}
 					}
 					//String message = input.readUTF();
 					//JSONArray results=message./////////////////////
@@ -93,6 +100,10 @@ class Client {
 		String name = "";
 		if (command.hasOption("name")) {
 			name = command.getOptionValue("name");
+		}
+		String tags="";
+		if(command.hasOption("tags")){
+			tags=command.getOptionValue("tags");
 		}
 		String des = "";
 		if (command.hasOption("description")) {
@@ -225,6 +236,10 @@ class Client {
 
 	@SuppressWarnings("unchecked")
 	private static void JSONQuery(CommandLine command, DataOutputStream output) {
+		String tags="";
+		if(command.hasOption("tags")){
+			tags=command.getOptionValue("tags");
+		}
 		String name = "";
 		if (command.hasOption("name")) {
 			name = command.getOptionValue("name");
@@ -249,6 +264,7 @@ class Client {
 		}
 		JSONObject resourceTemplate = new JSONObject();
 		JSONObject commandObj = new JSONObject();
+		resourceTemplate.put("tags", tags);
 		resourceTemplate.put("name", name);
 		resourceTemplate.put("description", des);
 		resourceTemplate.put("uri", uri);
@@ -269,6 +285,10 @@ class Client {
 
 	@SuppressWarnings("unchecked")
 	private static void JSONPublish(CommandLine command, DataOutputStream output) {
+		String tags="";
+		if(command.hasOption("tags")){
+			tags=command.getOptionValue("tags");
+		}
 
 		String name = "";
 		if (command.hasOption("name")) {
@@ -294,6 +314,7 @@ class Client {
 		}
 		JSONObject resource = new JSONObject();
 		JSONObject commandObj = new JSONObject();
+		resource.put("tags", tags);
 		resource.put("name", name);
 		resource.put("description", des);
 		resource.put("uri", uri);
@@ -313,6 +334,10 @@ class Client {
 
 	@SuppressWarnings("unchecked")
 	private static void JSONRemove(CommandLine command, DataOutputStream output) {
+		String tags="";
+		if(command.hasOption("tags")){
+			tags=command.getOptionValue("tags");
+		}
 		String name = "";
 		if (command.hasOption("name")) {
 			name = command.getOptionValue("name");
@@ -335,6 +360,7 @@ class Client {
 		}
 		JSONObject resource = new JSONObject();
 		JSONObject commandObj = new JSONObject();
+		resource.put("tags", tags);
 		resource.put("name", name);
 		resource.put("description", des);
 		resource.put("uri", uri);
@@ -353,6 +379,10 @@ class Client {
 
 	@SuppressWarnings("unchecked")
 	private static void JSONShare(CommandLine command, DataOutputStream output) {
+		String tags="";
+		if(command.hasOption("tags")){
+			tags=command.getOptionValue("tags");
+		}
 		String name = "";
 		if (command.hasOption("name")) {
 			name = command.getOptionValue("name");
@@ -375,6 +405,7 @@ class Client {
 		}
 		JSONObject resource = new JSONObject();
 		JSONObject commandObj = new JSONObject();
+		resource.put("tags", tags);
 		resource.put("name", name);
 		resource.put("description", des);
 		resource.put("uri", uri);
