@@ -28,6 +28,37 @@ class Resource {
 		this.owner=checker(owner);
 		this.ezserver=checker(ezserver);	
 	}
+	public Resource(Resource obj){
+		this.name=obj.get("name");
+		this.description=obj.get("description");
+		this.tags=obj.getTags();
+		this.uri=obj.get("uri");
+		this.channel=obj.get("channel");
+		if(obj.get("owner").equals("")){
+		this.owner=obj.get("owner");}
+		else this.owner="*";
+		this.ezserver=Server.hostname+":"+Server.port;
+	}
+	 JSONObject toJSON(){
+    	JSONObject obj=new JSONObject();
+    	obj.put("name", this.get("name"));   
+    	String tagString;
+		if(this.getTags()==null) { tagString = "[ ]";}
+    	else{
+    		tagString="["+this.getTags()[0];
+    	for(int i=1;i<this.getTags().length;i++){
+    		tagString+=","+this.getTags()[i];
+    	}
+    	tagString+="]";
+    	}
+    	obj.put("tags", tagString);
+    	obj.put("description", this.get("description"));
+    	obj.put("uri", this.get("uri"));
+    	obj.put("channel", this.get("channel"));
+    	obj.put("owner", this.get("owner"));
+    	obj.put("ezserver", this.get("ezserver"));
+    	return obj;
+	}
 	//输入JSONObject，建成的Resource和上面一个方法类似
 	public Resource(JSONObject json) {
 		this.name = checker((String) ((HashMap) json.get("resource")).get("name"));

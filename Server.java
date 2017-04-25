@@ -46,8 +46,8 @@ import org.json.simple.parser.ParseException;
 	public class Server {
 		
 		// Declare the port number
-		private static int port = 3000;
-		
+		static int port = 3000;
+		static String hostname="Vangogh";
 		// Identifies the user number connected
 		private static int counter = 0;
 		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();

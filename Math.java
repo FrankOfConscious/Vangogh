@@ -241,8 +241,9 @@ public class Math {
 			JSONObject obj=new JSONObject();
 			obj.put("response", "success");
 			result.add(obj);
-			for(int i=0;i<tempList.size();i++){
-				result.add(tempList.get(i).toJSON());
+			for(int i=0;i<tempList.size();i++){           /////////////////////
+				result.add(( new Resource(tempList.get(i).getObj())).toJSON());
+				
 			}
 			obj=new JSONObject();
 			obj.put("resultsize", tempList.size());
