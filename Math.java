@@ -37,9 +37,10 @@ public class Math {
 			//each case handles more explicit situation
 			case "PUBLISH":
 				result=publishJSON(command);
-				System.out.println(result.size());///////
+				System.out.println("Current ResourceList size:"+result.size());///////
 				break;
 			case "REMOVE":result=removeJSON(command);
+				System.out.println("Current ResourceList size:"+result.size());///////
 				break;
 			case "SHARE":result=shareJSON(command);
 				break;
