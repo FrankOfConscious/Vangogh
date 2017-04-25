@@ -54,6 +54,7 @@ import org.json.simple.parser.ParseException;
 		static String secret = "";
 
 
+		
 		public static void main(String[] args) {
 			ServerSocketFactory factory = ServerSocketFactory.getDefault();
 			try(ServerSocket server = factory.createServerSocket(port)){
@@ -98,7 +99,7 @@ import org.json.simple.parser.ParseException;
 			    		// Attempt to convert read data to JSON
 			    		JSONObject command = (JSONObject) parser.parse(input.readUTF());
 			    		System.out.println("COMMAND RECEIVED: "+command.toJSONString());
-			    		JSONArray result = Math.parseCommand(command);
+			    		JSONArray result = Math.parseCommand(command, output);
 			    		for(int i=0;i<result.size();i++){
 				    		
 				    		output.writeUTF(((JSONObject)result.get(i)).toJSONString());
