@@ -334,35 +334,30 @@ class Client {
 
 	@SuppressWarnings("unchecked")
 	private static void JSONRemove(CommandLine command, DataOutputStream output) {
-		String tags="";
-		if(command.hasOption("tags")){
-			tags=command.getOptionValue("tags");
-		}
-		String name = "";
-		if (command.hasOption("name")) {
-			name = command.getOptionValue("name");
-		}
-		String des = "";
-		if (command.hasOption("description")) {
-			des = command.getOptionValue("description");
-		}
+		
 		String uri = "";
 		if (command.hasOption("uri")) {
 			uri = command.getOptionValue("uri");
+		}else{
+			uri=null;
 		}
 		String channel = "";
 		if (command.hasOption("channel")) {
 			channel = command.getOptionValue("channel");
+		}else{
+			channel=null;
 		}
 		String owner = "";
 		if (command.hasOption("owner")) {
 			owner = command.getOptionValue("owner");
+			if(owner.equals(".classpath")) owner="*";
+			
+		}else{
+			owner=null;
 		}
 		JSONObject resource = new JSONObject();
 		JSONObject commandObj = new JSONObject();
-		resource.put("tags", tags);
-		resource.put("name", name);
-		resource.put("description", des);
+		
 		resource.put("uri", uri);
 		resource.put("channel", channel);
 		resource.put("owner", owner);
@@ -413,12 +408,12 @@ class Client {
 		resource.put("owner", owner);
 		resource.put("ezserver", null);
 		String secrect = "";
-		if (command.hasOption("secrect")) {
-			secrect = command.getOptionValue("secrect");
+		if (command.hasOption("secret")) {
+			secrect = command.getOptionValue("secret");
 		}
 		commandObj.put("command", "SHARE");
 		commandObj.put("resource", resource);
-		commandObj.put("secrect", secrect);
+		commandObj.put("secret", secrect);
 
 		try {
 			output.writeUTF(commandObj.toJSONString());
