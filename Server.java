@@ -182,6 +182,11 @@ public class Server {
 			result.put("errorMessage", "invalid resource");
 			output.writeUTF(result.toJSONString());
 			return;
+		} else if (((String) command.get("uri")).length() <= 4 || (((String) command.get("uri")).length() > 4 && !((String) command.get("uri")).substring(0, 4).equals("file"))) {
+			result.put("response", "error");
+			result.put("errorMessage", "invalid resource");
+			output.writeUTF(result.toJSONString());
+			return;
 		} else {
 			//this checks whether the secret is correct
 			boolean eligible = false;
@@ -254,8 +259,7 @@ public class Server {
 					output.writeUTF(result.toJSONString());
 					return;
 				}	
-			}
-			
+			}		
 			if(!removed){
 				result.put("response", "error");
 				result.put("errorMessage", "cannot remove resource");
@@ -310,4 +314,3 @@ public class Server {
 		return;
 	}
 }
-
