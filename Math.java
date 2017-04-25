@@ -144,7 +144,7 @@ public class Math {
 				!((HashMap) command.get("resource")).containsKey("channel")||
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
-			result.put("errorMessage", "missing resource and\\/or secret");
+			result.put("errorMessage", "missing resource and/or secret");
 			array.add(result);
 			return array;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
@@ -156,9 +156,9 @@ public class Math {
 			//this checks whether the secret is correct
 			boolean eligible = false;
 			
-			if (Server.secret.equals(command.get("secret"))) 
-					eligible = true;
-				
+			if (Server.secret.equals(command.get("secret"))) {
+					eligible = true;	
+			}
 			
 			if (!eligible) {
 				result.put("response", "error");
@@ -168,8 +168,11 @@ public class Math {
 			}
 		}
 		//this if clause check if the file scheme is "file"
-		if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("file") ||
-				((String)((HashMap) command.get("resource")).get("uri")).charAt(0) == '/') {
+		if(
+				((String)((HashMap) command.get("resource")).get("uri")).length()<7
+				||  (((String)((HashMap) command.get("resource")).get("uri")).length()>=7 
+				&& !((String)((HashMap) command.get("resource")).get("uri")).substring(0, 7).equals("file://"))
+				) {
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
 			array.add(result);
