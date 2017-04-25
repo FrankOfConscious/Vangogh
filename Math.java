@@ -196,6 +196,7 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
+			array.add(result);
 			return array;
 		}
 	}
