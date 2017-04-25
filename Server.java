@@ -1,31 +1,5 @@
-//package Server;
-//import java.io.DataInputStream;
-//import java.io.DataOutputStream;
-//import java.io.IOException;
-//import java.net.ServerSocket;
-//import java.net.Socket;
-//import java.util.ArrayList;
-//
-//import javax.net.ServerSocketFactory;
-//
-//import org.json.simple.JSONArray;
-//import org.json.simple.JSONObject;
-//import org.json.simple.parser.JSONParser;
-//import org.json.simple.parser.ParseException;
-//
-//public class Server {
-//	
-//	// Declare the port number
-//	private static int port = 3000;
-//	
-//	// Identifies the user number connected
-//	private static int counter = 0;
-//	
-//	static  ArrayList< KeyTuple> resourceList;
-//	static String secret = "";
-
-//////
 package Server;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
