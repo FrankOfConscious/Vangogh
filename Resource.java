@@ -14,7 +14,7 @@ class Resource {
 	private String[] tags=null;
 	private String ezserver;
 	
-	//ÓÃÀ´´æ´¢serverÀï´´½¨µÄResource obj
+	//ç”¨æ¥å­˜å‚¨serveré‡Œåˆ›å»ºçš„Resource obj
 	private static ArrayList<Resource> resourceList = new ArrayList<Resource>();
 	
 	public Resource(String name, String description, String[] tags, String uri, String channel, String owner, String ezserver){
@@ -42,15 +42,27 @@ class Resource {
 	 JSONObject toJSON(){
     	JSONObject obj=new JSONObject();
     	obj.put("name", this.get("name"));   
-    	String tagString;
-		if(this.getTags()==null) { tagString = "[ ]";}
-    	else{
-    		tagString="["+this.getTags()[0];
-    	for(int i=1;i<this.getTags().length;i++){
-    		tagString+=","+this.getTags()[i];
+//    	String tagString;
+//		if(this.getTags()==null) { tagString = "[ ]";}
+//    	else{
+//    		tagString="["+this.getTags()[0];
+//    	for(int i=1;i<this.getTags().length;i++){
+//    		tagString+=","+this.getTags()[i];
+//    	}
+//    	tagString+="]";
+//    	}
+    	ArrayList<String> tagArray=new ArrayList<String>();
+    	for(int i=0;i<this.getTags().length;i++){
+    		tagArray.add(this.getTags()[i]);
     	}
-    	tagString+="]";
-    	}
+    	obj.put("tags", tagArray);
+    	obj.put("description", this.get("description"));
+    	obj.put("uri", this.get("uri"));
+    	obj.put("channel", this.get("channel"));
+    	obj.put("owner", this.get("owner"));
+    	obj.put("ezserver", this.get("ezserver"));
+    	return obj;
+	}
     	obj.put("tags", tagString);
     	obj.put("description", this.get("description"));
     	obj.put("uri", this.get("uri"));
@@ -59,7 +71,7 @@ class Resource {
     	obj.put("ezserver", this.get("ezserver"));
     	return obj;
 	}
-	//ÊäÈëJSONObject£¬½¨³ÉµÄResourceºÍÉÏÃæÒ»¸ö·½·¨ÀàËÆ
+	//è¾“å…¥JSONObjectï¼Œå»ºæˆçš„Resourceå’Œä¸Šé¢ä¸€ä¸ªæ–¹æ³•ç±»ä¼¼
 	public Resource(JSONObject json) {
 		this.name = checker((String) ((HashMap) json.get("resource")).get("name"));
 		if(((HashMap) json.get("resource")).get("tags").equals("")) this.tags=null;
@@ -71,7 +83,7 @@ class Resource {
 		if(((HashMap) json.get("resource")).get("ezserver")==null) this.ezserver=null;
 		else this.ezserver = checker((String) ((HashMap) json.get("resource")).get("ezserver"));
 	}
-	//¸ù¾İcommand´´½¨Resource£¬²¢½«Æä´æ´¢ÔÚresourceListÀï
+	//æ ¹æ®commandåˆ›å»ºResourceï¼Œå¹¶å°†å…¶å­˜å‚¨åœ¨resourceListé‡Œ
 	public static void createResource(JSONObject command) {
 		resourceList.add(new Resource(command));
 	}
