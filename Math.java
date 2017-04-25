@@ -70,8 +70,7 @@ public class Math {
 		}
 		return result;
 	}
-	
-	private static void publishJSON(JSONObject command, DataOutputStream output) throws IOException {
+		public static void publishJSON(JSONObject command, DataOutputStream output) throws IOException {
 		JSONObject result = new JSONObject();
 		if(!command.containsKey("resource")||
 				!((HashMap) command.get("resource")).containsKey("owner")||
@@ -86,34 +85,34 @@ public class Math {
 			result.put("errorMessage", "invalid resource");
 			output.writeUTF(result.toJSONString());
 			return;
-		} else if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("http")) {
-			//this if clause check if the file scheme is "file"
+		} else if (((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("http")) {
+			
+		} else {
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
 			output.writeUTF(result.toJSONString());
 			return;
-		} else {
-			for (int i = 0; i < Server.resourceList.size(); i++) {
-				//this if clause check if there is resource with same channel and uri but different owner
-				if (Server.resourceList.get(i).ifduplicated(command)) {
-					result.put("response", "error");
-					result.put("errorMessage", "cannot publish resource");
-					output.writeUTF(result.toJSONString());
-					return;
-				}
-				//this checks if there is resource with same channel, uri and owner, replace the obj
-				else if (Server.resourceList.get(i).ifOverwrites(command)) {
-					Server.resourceList.get(i).overwrites(command);
-					result.put("response", "success");
-					output.writeUTF(result.toJSONString());
-					return;
-				}	
-			}
-			
-			Server.resourceList.add(new KeyTuple(new Resource(command)));
-			result.put("response", "success");
-			return;
 		}
+		
+		for (int i = 0; i < Server.resourceList.size(); i++) {
+			//this if clause check if there is resource with same channel and uri but different owner
+			if (Server.resourceList.get(i).ifduplicated(command)) {
+				result.put("response", "error");
+				result.put("errorMessage", "cannot publish resource");
+				output.writeUTF(result.toJSONString());
+				return;
+			}
+			//this checks if there is resource with same channel, uri and owner, replace the obj
+			else if (Server.resourceList.get(i).ifOverwrites(command)) {
+				Server.resourceList.get(i).overwrites(command);
+				result.put("response", "success");
+				output.writeUTF(result.toJSONString());
+				return;
+			}
+		}
+		Server.resourceList.add(new KeyTuple(new Resource(command)));
+		result.put("response", "success");
+		return;
 	}
 	
 	private static void shareJSON(JSONObject command, DataOutputStream output) throws IOException {
