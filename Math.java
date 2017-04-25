@@ -316,10 +316,10 @@ public class Math {
 	private static JSONArray removeJSON(JSONObject command){
 		JSONObject result= new JSONObject();
 		JSONArray array=new JSONArray();
-		if(!command.containsKey("resource")||
-				!((HashMap) command.get("resource")).containsKey("owner")||
-				!((HashMap) command.get("resource")).containsKey("channel")||
-				!((HashMap) command.get("resource")).containsKey("uri")){
+		if(
+				((HashMap) command.get("resource")).get("owner")==null||
+				((HashMap) command.get("resource")).get("channel")==null||
+				((HashMap) command.get("resource")).get("uri")==null){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
 			array.add(result);
@@ -335,6 +335,10 @@ public class Math {
 				
 				if(Server.resourceList.get(i).ifOverwrites(command)){
 					Server.resourceList.remove(i);
+					System.out.println("resourceList:"+Server.resourceList.size());
+					for(int k=0;k<Server.resourceList.size();k++){
+						System.out.println(Server.resourceList.get(k).getUri());
+					}
 					result.put("response", "success");
 					removed=true;
 					break;
@@ -343,14 +347,14 @@ public class Math {
 			}
 			if(!removed){
 				result.put("response", "error");
-				result.put("errorMessage", "cannot remove resource");	
+				result.put("errorMessage", "cannot remove resource(not exsit)");	
 			}
 			array.add(result);
 			return array;
 			
 		}
 			
-		}
+	}
 	private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
 		// TODO Auto-generated method stub
 		boolean[] rules=new boolean[11];
