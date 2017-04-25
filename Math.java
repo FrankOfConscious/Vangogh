@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Math {
 	public int add(int x, int y){
@@ -25,17 +24,8 @@ public class Math {
 		
 	}
 	
-	public static JSONObject parseCommand(JSONObject command, DataOutputStream output) throws IOException {
+	public static void parseCommand(JSONObject command, DataOutputStream output) throws IOException {
 		JSONObject result = new JSONObject();
-		if (!command.containsKey("resource") ||
-				!((HashMap)command.get("resource")).containsKey("name") ||
-				!((HashMap)command.get("resource")).containsKey("tags") ||
-				!((HashMap)command.get("resource")).containsKey("description") ||
-				!((HashMap)command.get("resource")).containsKey("uri")||
-				!((HashMap)command.get("resource")).containsKey("channel")||
-				!((HashMap)command.get("resource")).containsKey("owner")||
-				!((HashMap)command.get("resource")).containsKey("ezserver")) {
-		}
 		//this solves generic response
 		if (command.containsKey("command")) {
 			switch((String) command.get("command")) {
@@ -68,9 +58,9 @@ public class Math {
 			result.put("errorMessage", "missing or incorrect type for command");
 			output.writeUTF(result.toJSONString());
 		}
-		return result;
 	}
-		public static void publishJSON(JSONObject command, DataOutputStream output) throws IOException {
+	
+	private static void publishJSON(JSONObject command, DataOutputStream output) throws IOException {
 		JSONObject result = new JSONObject();
 		if(!command.containsKey("resource")||
 				!((HashMap) command.get("resource")).containsKey("owner")||
@@ -85,34 +75,34 @@ public class Math {
 			result.put("errorMessage", "invalid resource");
 			output.writeUTF(result.toJSONString());
 			return;
-		} else if (((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("http")) {
-			
-		} else {
+		} else if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("http")) {
+			//this if clause check if the file scheme is "file"
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
 			output.writeUTF(result.toJSONString());
 			return;
-		}
-		
-		for (int i = 0; i < Server.resourceList.size(); i++) {
-			//this if clause check if there is resource with same channel and uri but different owner
-			if (Server.resourceList.get(i).ifduplicated(command)) {
-				result.put("response", "error");
-				result.put("errorMessage", "cannot publish resource");
-				output.writeUTF(result.toJSONString());
-				return;
+		} else {
+			for (int i = 0; i < Server.resourceList.size(); i++) {
+				//this if clause check if there is resource with same channel and uri but different owner
+				if (Server.resourceList.get(i).ifduplicated(command)) {
+					result.put("response", "error");
+					result.put("errorMessage", "cannot publish resource");
+					output.writeUTF(result.toJSONString());
+					return;
+				}
+				//this checks if there is resource with same channel, uri and owner, replace the obj
+				else if (Server.resourceList.get(i).ifOverwrites(command)) {
+					Server.resourceList.get(i).overwrites(command);
+					result.put("response", "success");
+					output.writeUTF(result.toJSONString());
+					return;
+				}	
 			}
-			//this checks if there is resource with same channel, uri and owner, replace the obj
-			else if (Server.resourceList.get(i).ifOverwrites(command)) {
-				Server.resourceList.get(i).overwrites(command);
-				result.put("response", "success");
-				output.writeUTF(result.toJSONString());
-				return;
-			}
+			
+			Server.resourceList.add(new KeyTuple(new Resource(command)));
+			result.put("response", "success");
+			return;
 		}
-		Server.resourceList.add(new KeyTuple(new Resource(command)));
-		result.put("response", "success");
-		return;
 	}
 	
 	private static void shareJSON(JSONObject command, DataOutputStream output) throws IOException {
