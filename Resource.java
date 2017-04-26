@@ -14,7 +14,7 @@ class Resource {
 	private String[] tags=null;
 	private String ezserver;
 	
-	//ÓÃÀ´´æ´¢serverÀï´´½¨µÄResource obj
+	//ç”¨æ¥å­˜å‚¨serveré‡Œåˆ›å»ºçš„Resource obj
 	private static ArrayList<Resource> resourceList = new ArrayList<Resource>();
 	
 	public Resource(String name, String description, String[] tags, String uri, String channel, String owner, String ezserver){
@@ -37,7 +37,7 @@ class Resource {
 		if(obj.get("owner").equals("")){
 		this.owner=obj.get("owner");}
 		else this.owner="*";
-		this.ezserver=Server.hostname+":"+Server.port;
+		this.ezserver=Server.advertisedHostName+":"+Server.port;
 	}
 	 JSONObject toJSON(){
     	JSONObject obj=new JSONObject();
@@ -63,7 +63,7 @@ class Resource {
     	obj.put("ezserver", this.get("ezserver"));
     	return obj;
 	}
-	//ÊäÈëJSONObject£¬½¨³ÉµÄResourceºÍÉÏÃæÒ»¸ö·½·¨ÀàËÆ
+	//è¾“å…¥JSONObjectï¼Œå»ºæˆçš„Resourceå’Œä¸Šé¢ä¸€ä¸ªæ–¹æ³•ç±»ä¼¼
 	public Resource(JSONObject json) {
 		this.name = checker((String) ((HashMap) json.get("resource")).get("name"));
 		if(((HashMap) json.get("resource")).get("tags").equals("")) this.tags=null;
@@ -75,7 +75,7 @@ class Resource {
 		this.ezserver=Server.advertisedHostName+":"+Server.port;
 		
 	}
-	//¸ù¾İcommand´´½¨Resource£¬²¢½«Æä´æ´¢ÔÚresourceListÀï
+	//æ ¹æ®commandåˆ›å»ºResourceï¼Œå¹¶å°†å…¶å­˜å‚¨åœ¨resourceListé‡Œ
 	public static void createResource(JSONObject command) {
 		resourceList.add(new Resource(command));
 	}
