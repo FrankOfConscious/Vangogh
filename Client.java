@@ -262,6 +262,10 @@ class Client {
 			if(owner.equals(".classpath")) owner="*";
 			System.out.println(owner);
 		}
+		boolean relay = false;
+		if (command.hasOption("relay")) {
+			relay = command.getOptionValue("relay").equals("true")?true:false;
+		}
 		JSONObject resourceTemplate = new JSONObject();
 		JSONObject commandObj = new JSONObject();
 		resourceTemplate.put("tags", tags);
@@ -272,7 +276,7 @@ class Client {
 		resourceTemplate.put("owner", owner);
 		resourceTemplate.put("ezserver", null);
 		commandObj.put("command", "QUERY");
-		commandObj.put("relay", true);
+		commandObj.put("relay", relay);
 		commandObj.put("resourceTemplate", resourceTemplate);
 		try {
 			output.writeUTF(commandObj.toJSONString());
@@ -282,6 +286,7 @@ class Client {
 		}
 
 	}
+
 
 	@SuppressWarnings("unchecked")
 	private static void JSONPublish(CommandLine command, DataOutputStream output) {
@@ -442,6 +447,7 @@ class Client {
 		options.addOption("share", false, "share resource on server");
 		options.addOption("tags", true, "resource tags");
 		options.addOption("uri", true, "resource URI");
+		options.addOption("relay", true, "query relay");
 
 	}
 
