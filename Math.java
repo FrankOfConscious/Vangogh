@@ -28,7 +28,7 @@ public class Math {
 		
 	}
 	
-	static JSONArray parseCommand(JSONObject command) {
+	static JSONArray parseCommand(JSONObject command, DataOutputStream) {
 		JSONArray result = new JSONArray();
 		
 		//this solves generic response
@@ -46,9 +46,9 @@ public class Math {
 				break;
 			case "QUERY":result=queryJSON(command);
 				break;
-			case "FETCH":result=fetchJSON(command);
+			case "FETCH":result=fetchJSON(command, output);
 				break;
-			case "EXCHANGE":result=fetchJSON(command);
+			case "EXCHANGE":result=fetchJSON(command, output);
 				break;
 			default:
 				//return invalid command
@@ -261,7 +261,7 @@ public class Math {
 		
 	}
 	
-	private static JSONArray fetchJSON(JSONObject command) {
+	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output) {
 		JSONArray result = new JSONArray();
 		JSONObject obj = new JSONObject();
 		if (!command.containsKey("resourceTemplate")) {
