@@ -41,6 +41,7 @@ import org.json.simple.parser.ParseException;
 
 
 		
+		@SuppressWarnings("deprecation")
 		public static void main(String[] args) throws ParseException, org.apache.commons.cli.ParseException {
 			
 			
@@ -161,17 +162,21 @@ import org.json.simple.parser.ParseException;
 			    	if(input.available() > 0){
 			    		// Attempt to convert read data to JSON
 			    		JSONObject command = (JSONObject) parser.parse(input.readUTF());
-			    		System.out.println("COMMAND RECEIVED: "+command.toJSONString());
+			    		System.out.println("COMMAND RECEIVED: "+command.toJSONString());//////
 			    		JSONArray result = Math.parseCommand(command, output);
 			    		for(int i=0;i<result.size();i++){
 				    		
 				    		output.writeUTF(((JSONObject)result.get(i)).toJSONString());
-				    		System.out.println("What server did:"+result.get(i).toString());
+				    		System.out.println("What server did:"+result.get(i).toString());/////
 			    		}
 			    		output.flush();
+			    		output.close();
+			    		input.close();
+			    		break;
 
 			    	}
 			    }
+			    
 			} catch (IOException | ParseException e) {
 				e.printStackTrace();
 			}

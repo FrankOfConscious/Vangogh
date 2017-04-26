@@ -75,13 +75,16 @@ class Client {
 					while(true){
 						if(input.available()>0){
 						String message = input.readUTF();
+						if(message.equals("{\"endOfTransmit\":true}")) break;
 						System.out.println(message);
-						int a=Server.resourceList.size();
-						for(int i =0;i<a;i++){
-						System.out.println(Server.resourceList.get(i).toString());
-						}
+						int a=Server.resourceList.size();///
+						for(int i =0;i<a;i++){/////
+						System.out.println(Server.resourceList.get(i).toString());////
+						}////
 					}
 					}
+					input.close();
+					output.close();
 					//String message = input.readUTF();
 					//JSONArray results=message./////////////////////
 					//System.out.println(message);
@@ -279,7 +282,6 @@ class Client {
 		}
 
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private static void JSONPublish(CommandLine command, DataOutputStream output) {
