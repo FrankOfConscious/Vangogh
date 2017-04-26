@@ -1,17 +1,23 @@
 package Server;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import javax.net.ServerSocketFactory;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,17 +25,93 @@ import org.json.simple.parser.ParseException;
 
 	public class Server {
 		
+	
 		// Declare the port number
-		static int port = 3000;
-		static String hostname="Vangogh";
+		static int port;
+		static String hostname;
 		// Identifies the user number connected
+		static String advertisedHostName;
+		static int connectionIntervalLimit=1;
+		static int exchangeInterval=600;
 		private static int counter = 0;
 		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
-		static String secret = "";
+		static String secret = null;
 		static ArrayList<String> serverRecords=new ArrayList<String>();
 
+
 		
-		public static void main(String[] args) {
+		public static void main(String[] args) throws ParseException, org.apache.commons.cli.ParseException {
+			
+			
+//			setServer(String[] args);
+			
+			
+			//////////////////////////////////////////////////////////////
+			// Parse CMD options
+			Options options = new Options();
+			AddOptions(options);
+
+			// accept args from CMD
+			CommandLineParser parser = new DefaultParser();
+			CommandLine cmd = null;
+
+			cmd = parser.parse(options, args);
+			if (cmd.hasOption("port") ) {
+				port = Integer.parseInt(cmd.getOptionValue("port"));
+	//			advertisedHostName = cmd.getOptionValue("advertisedname");
+			} else {
+				System.out.println("Please provide port options");
+				System.exit(0);
+			}
+			if(cmd.hasOption("connectionintervallimit")){
+				try{
+					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("connectionintervallimit"));
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else Server.connectionIntervalLimit=1;
+			if(cmd.hasOption("exchangeinterval")){
+				try{
+					Server.exchangeInterval=Integer.parseInt(cmd.getOptionValue("exchangeinterval"));
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else Server.exchangeInterval=600;
+			if(cmd.hasOption("secret")){
+				try{
+					Server.secret=cmd.getOptionValue("secret");
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else {
+				Random rand = new Random();
+				Server.secret=getRandomString(rand.nextInt(10)+20);
+			}
+			if(cmd.hasOption("advertisedhostname")){
+				try{
+					Server.advertisedHostName=cmd.getOptionValue("advertiedhostname");
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else {
+				InetAddress gethost;
+				try {
+					gethost = InetAddress.getLocalHost();
+					Server.advertisedHostName=gethost.getHostName();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+			}
+			System.out.println(Server.advertisedHostName);
+			System.out.println(Server.connectionIntervalLimit);
+			System.out.println(Server.exchangeInterval);
+			System.out.println(Server.port);
+			System.out.println(Server.secret);
+			System.out.println(Server.hostname);
+
+			
+			//////////////////////////////////////////////////////////////
 			ServerSocketFactory factory = ServerSocketFactory.getDefault();
 			try(ServerSocket server = factory.createServerSocket(port)){
 				System.out.println("Waiting for client connection..");
@@ -53,6 +135,8 @@ import org.json.simple.parser.ParseException;
 			
 		}
 		
+		
+
 		private static void serveClient(Socket client){
 			try(Socket clientSocket = client){
 				
@@ -155,5 +239,85 @@ import org.json.simple.parser.ParseException;
 			// TODO Auto-generated method stub
 			return result;
 		}
+		
+		////////to update
+		public static void AddOptions(Options options) {
+			options.addOption("debug", false, "Print debut information");
+			options.addOption("secret", true, "Server secret");
+			options.addOption("port", true, "server port, an integer");
+			options.addOption("exchangeinterval", true, "exchange interval in seconds");
+			options.addOption("connectionintervallimit", true, "connection interval limit in seconds");
+			options.addOption("advertisehostname", true, "advertised hostname");
+			
+
+		}
+		private static void setServer(String[] args) {
+			// TODO Auto-generated method stub
+			Options options = new Options();
+			AddOptions(options);
+
+			// accept args from CMD
+			CommandLineParser parser = new DefaultParser();
+			CommandLine cmd = null;
+
+			cmd = parser.parse(options, args);
+			if (cmd.hasOption("port") ) {
+				port = Integer.parseInt(cmd.getOptionValue("PORT"));
+	//			advertisedHostName = cmd.getOptionValue("advertisedname");
+			} else {
+				System.out.println("Please provide  PORT options");
+				System.exit(0);
+			}
+			if(cmd.hasOption("connectionintervallimit")){
+				try{
+					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("connectionintervallimit"));
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else Server.connectionIntervalLimit=1;
+			if(cmd.hasOption("exchangeinterval")){
+				try{
+					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("exchangeinterval"));
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else Server.exchangeInterval=600;
+			if(cmd.hasOption("secret")){
+				try{
+					Server.secret=cmd.getOptionValue("secret");
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else {
+				Random rand = new Random();
+				Server.secret=getRandomString(rand.nextInt(10)+20);
+			}
+			if(cmd.hasOption("advertisedhostname")){
+				try{
+					Server.advertisedHostName=cmd.getOptionValue("advertiedhostname");
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}else {
+				InetAddress gethost;
+				try {
+					gethost = InetAddress.getLocalHost();
+					Server.advertisedHostName=gethost.getHostName();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+			}
+		}
+		private static String getRandomString(int length){
+		     String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		     Random random=new Random();
+		     StringBuffer sb=new StringBuffer();
+		     for(int i=0;i<length;i++){
+		       int number=random.nextInt(62);
+		       sb.append(str.charAt(number));
+		     }
+		     return sb.toString();
+		 }
 
 	}
