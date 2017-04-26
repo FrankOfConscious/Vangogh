@@ -207,24 +207,17 @@ class Client {
 
 	@SuppressWarnings("unchecked")
 	private static void JSONExchange(CommandLine command, DataOutputStream output) {
-		String[] host = new String[2];
-		if (command.hasOption("servers")) {
-			host = command.getOptionValue("servers").split(",");
-		}
-		JSONObject commandObj = new JSONObject();
-		JSONObject element0 = new JSONObject();
-		JSONObject element1 = new JSONObject();
-		JSONArray ServerList = new JSONArray();
 
-		element0.put("hostname", host[0]);
-		element0.put("port", Integer.parseInt(command.getOptionValue("PORT")));
-		element1.put("hostname", host[1]);
-		element1.put("port", Integer.parseInt(command.getOptionValue("PORT")));
-		ServerList.add(element0);
-		ServerList.add(element1);
+		String serverList ;
+		if (command.hasOption("servers")) {
+			serverList= command.getOptionValue("servers");
+		}
+		else serverList=null;
+		JSONObject commandObj = new JSONObject();
+
 
 		commandObj.put("command", "EXCHANGE");
-		commandObj.put("serverlist", ServerList);
+		commandObj.put("serverlist", serverList);
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
