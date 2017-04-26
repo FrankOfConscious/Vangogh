@@ -26,7 +26,7 @@ import org.json.simple.parser.ParseException;
 		private static int counter = 0;
 		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
 		static String secret = "";
-
+		static ArrayList<String> serverRecords=new ArrayList<String>();
 
 		
 		public static void main(String[] args) {
