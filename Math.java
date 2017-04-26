@@ -28,7 +28,7 @@ public class Math {
 		
 	}
 	
-	static JSONArray parseCommand(JSONObject command, DataOutputStream) {
+	static JSONArray parseCommand(JSONObject command, DataOutputStream output) {
 		JSONArray result = new JSONArray();
 		
 		//this solves generic response
