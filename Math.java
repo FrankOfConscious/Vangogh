@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -28,7 +30,7 @@ public class Math {
 		
 	}
 	
-	static JSONArray parseCommand(JSONObject command, DataOutputStream output) {
+	static JSONArray parseCommand(JSONObject command,DataOutputStream output) {
 		JSONArray result = new JSONArray();
 		
 		//this solves generic response
@@ -46,9 +48,10 @@ public class Math {
 				break;
 			case "QUERY":result=queryJSON(command);
 				break;
-			case "FETCH":result=fetchJSON(command, output);
+			case "FETCH":result=fetchJSON(command,output);
 				break;
-			case "EXCHANGE":result=fetchJSON(command, output);
+			case "EXCHANGE":result=exchangeJSON(command);
+				System.out.println("Current server List:"+Server.serverRecords.toString());
 				break;
 			default:
 				//return invalid command
@@ -91,12 +94,12 @@ public class Math {
 			array.add(result);
 			return array;
 		} else {
-			System.out.println("file or http::"+(String)((HashMap) command.get("resource")).get("uri"));//////
+//			System.out.println("file or http::"+(String)((HashMap) command.get("resource")).get("uri"));//////
 			if(   ((String)((HashMap) command.get("resource")).get("uri")).length()<7
 					||  (((String)((HashMap) command.get("resource")).get("uri")).length()>=7 
 					&& !((String)((HashMap) command.get("resource")).get("uri")).substring(0, 7).equals("file://"))
 					){
-				System.out.println("i am in if");
+//			System.out.println("i am in if");
 				
 				for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
@@ -109,11 +112,11 @@ public class Math {
 				//this checks if there is resource with same channel, uri and owner, replace the obj
 					if (Server.resourceList.get(i).ifOverwrites(command)) {
 						Server.resourceList.get(i).overwrites(command);
-						result.put("response", "success(overwrites)");
+						result.put("response", "success(overwrites)");/////
 						array.add(result);
 						return array;
 				}	
-					System.out.println("in for");
+//					System.out.println("in for");
 			}
 			
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
@@ -144,7 +147,7 @@ public class Math {
 				!((HashMap) command.get("resource")).containsKey("channel")||
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
-			result.put("errorMessage", "missing resource and/or secret");
+			result.put("errorMessage", "missing resource and\\/or secret");
 			array.add(result);
 			return array;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
@@ -156,9 +159,9 @@ public class Math {
 			//this checks whether the secret is correct
 			boolean eligible = false;
 			
-			if (Server.secret.equals(command.get("secret"))) {
-					eligible = true;	
-			}
+			if (Server.secret.equals(command.get("secret"))) 
+					eligible = true;
+				
 			
 			if (!eligible) {
 				result.put("response", "error");
@@ -168,11 +171,8 @@ public class Math {
 			}
 		}
 		//this if clause check if the file scheme is "file"
-		if(
-				((String)((HashMap) command.get("resource")).get("uri")).length()<7
-				||  (((String)((HashMap) command.get("resource")).get("uri")).length()>=7 
-				&& !((String)((HashMap) command.get("resource")).get("uri")).substring(0, 7).equals("file://"))
-				) {
+		if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("file") ||
+				((String)((HashMap) command.get("resource")).get("uri")).charAt(0) == '/') {
 			result.put("response", "error");
 			result.put("errorMessage", "cannot publish resource");
 			array.add(result);
@@ -196,7 +196,6 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
-			array.add(result);
 			return array;
 		}
 	}
@@ -354,7 +353,7 @@ public class Math {
 			
 		}
 			
-	}
+		}
 	private static JSONArray exchangeJSON(JSONObject command){
 		if((!command.containsKey("serverList"))||(command.get("serverList")==null)){
 			JSONObject obj=new JSONObject();
@@ -424,7 +423,7 @@ public class Math {
 	        Matcher matcher = pattern.matcher(ipAddress);
 	        return matcher.matches();
 	    }
-	  private static boolean ishostPort(String HP) {
+	  static boolean ishostPort(String HP) {
 	        String hostPort = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
 	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
 	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
@@ -440,6 +439,8 @@ public class Math {
 	        }
 	        return true;
 	    }
+	
+	
 	private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
 		// TODO Auto-generated method stub
 		boolean[] rules=new boolean[11];
@@ -491,4 +492,4 @@ public class Math {
 		if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;
 		else return false;
 	}
-}
+	}
