@@ -80,8 +80,7 @@ class Resource {
 		this.uri= checker((String) ((HashMap) json.get("resource")).get("uri"));
 		this.channel = checker((String) ((HashMap) json.get("resource")).get("channel"));
 		this.owner = checker((String) ((HashMap) json.get("resource")).get("owner"));
-		if(((HashMap) json.get("resource")).get("ezserver")==null) this.ezserver=null;
-		else this.ezserver = checker((String) ((HashMap) json.get("resource")).get("ezserver"));
+		this.ezserver=Server.advertisedHostName+":"+Server.port;
 	}
 	//根据command创建Resource，并将其存储在resourceList里
 	public static void createResource(JSONObject command) {
