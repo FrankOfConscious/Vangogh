@@ -367,7 +367,6 @@ public class Math {
 	}else {
 		
 		String serverRecord=command.get("serverList").toString();
-		System.out.println(serverRecord);
 		String [] RecordArray =serverRecord.split(",");
 		for(int i=0;i<RecordArray.length;i++){
 			if(!ishostPort(RecordArray[i])){
