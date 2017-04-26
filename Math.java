@@ -355,6 +355,91 @@ public class Math {
 		}
 			
 	}
+	private static JSONArray exchangeJSON(JSONObject command){
+		if((!command.containsKey("serverList"))||(command.get("serverList")==null)){
+			JSONObject obj=new JSONObject();
+			obj.put("response", "error");
+			obj.put("errorMessage", "missing or invalid server list");
+			JSONArray result=new JSONArray();
+			result.add(obj);
+			return result;
+		}else {
+	
+			String serverRecord=checker((String) command.get("serverList"));
+			String [] RecordArray =serverRecord.split(",");
+			for(int i=0;i<RecordArray.length;i++){
+				if(!ishostPort(RecordArray[i])){
+					JSONObject obj=new JSONObject();
+					obj.put("response", "error");
+					obj.put("errorMessage", "missing resourceTemplate");
+					JSONArray result=new JSONArray();
+					result.add(obj);
+					return result;
+				}
+			}
+			for(int i=0;i<RecordArray.length;i++){
+				String [] hostPort=RecordArray[i].split(":");
+				String hostName=hostPort[0];
+				String port=hostPort[1];
+				if(!(isIpv4(hostName)||!isPort(port))){
+			
+					JSONObject obj=new JSONObject();
+					obj.put("response", "error");
+					obj.put("errorMessage", "missing resourceTemplate");
+					JSONArray result=new JSONArray();
+					result.add(obj);
+					return result;
+				}
+				boolean exist=false;
+				for(int j=0;j<Server.serverRecords.size();j++){
+					if(Server.serverRecords.get(j).equals(RecordArray[i])){
+						exist=true;
+						break;
+					}
+				}
+				if(!exist)
+				Server.serverRecords.add(RecordArray[i]);
+		
+				
+			}
+		}
+		JSONObject obj=new JSONObject();
+		obj.put("response", "success");
+		JSONArray result=new JSONArray();
+		result.add(obj);	
+		return result;
+		
+	}
+	private static String checker(String input){
+		String b=input.replaceAll("\\s", "");
+		 b=b.replace("\0", "");
+		return b;	
+	}
+	 private static boolean isIpv4(String ipAddress) {
+	        String ip = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";
+	        Pattern pattern = Pattern.compile(ip);
+	        Matcher matcher = pattern.matcher(ipAddress);
+	        return matcher.matches();
+	    }
+	  private static boolean ishostPort(String HP) {
+	        String hostPort = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
+	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
+	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)"+":"+"\\d{1,5}$";
+	        Pattern pattern = Pattern.compile(hostPort);
+	        Matcher matcher = pattern.matcher(HP);
+	        return matcher.matches();
+	    }
+	 private static boolean isPort(String port) {
+		 int portNumber =Integer.parseInt(port);
+	        if(portNumber<0||portNumber>65535){
+	        	return false;
+	        }
+	        return true;
+	    }
 	private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
 		// TODO Auto-generated method stub
 		boolean[] rules=new boolean[11];
