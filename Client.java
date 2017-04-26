@@ -217,7 +217,7 @@ class Client {
 
 
 		commandObj.put("command", "EXCHANGE");
-		commandObj.put("serverlist", serverList);
+		commandObj.put("serverList", serverList);
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
