@@ -28,12 +28,13 @@ import org.json.simple.parser.ParseException;
 	
 		// Declare the port number
 		static int port;
-		static String hostname;
+		//static String hostname;
 		// Identifies the user number connected
 		static String advertisedHostName;
-		static int connectionIntervalLimit=1;
-		static int exchangeInterval=600;
+		private static int connectionIntervalLimit=1;
+		private static int exchangeInterval=600;
 		private static int counter = 0;
+		private static boolean debug;
 		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
 		static String secret = null;
 		static ArrayList<String> serverRecords=new ArrayList<String>();
@@ -56,11 +57,13 @@ import org.json.simple.parser.ParseException;
 			CommandLine cmd = null;
 
 			cmd = parser.parse(options, args);
-			if (cmd.hasOption("port") ) {
+			if (cmd.hasOption("port")&& Math.isPort(cmd.getOptionValue("port")) ) {
+				
 				port = Integer.parseInt(cmd.getOptionValue("port"));
+				
 	//			advertisedHostName = cmd.getOptionValue("advertisedname");
 			} else {
-				System.out.println("Please provide port options");
+				System.out.println("Please provide invalid port options");
 				System.exit(0);
 			}
 			if(cmd.hasOption("connectionintervallimit")){
@@ -103,12 +106,14 @@ import org.json.simple.parser.ParseException;
 					e.printStackTrace();
 				} 
 			}
-			System.out.println(Server.advertisedHostName);
-			System.out.println(Server.connectionIntervalLimit);
-			System.out.println(Server.exchangeInterval);
-			System.out.println(Server.port);
-			System.out.println(Server.secret);
-			System.out.println(Server.hostname);
+			if(cmd.hasOption("debug")) Server.debug=true;
+			else debug=false;
+//			System.out.println(Server.advertisedHostName);
+//			System.out.println(Server.connectionIntervalLimit);
+//			System.out.println(Server.exchangeInterval);
+//			System.out.println(Server.port);
+//			System.out.println(Server.secret);
+//			System.out.println(Server.hostname);
 
 			
 			//////////////////////////////////////////////////////////////
@@ -251,64 +256,64 @@ import org.json.simple.parser.ParseException;
 			
 
 		}
-		private static void setServer(String[] args) {
-			// TODO Auto-generated method stub
-			Options options = new Options();
-			AddOptions(options);
-
-			// accept args from CMD
-			CommandLineParser parser = new DefaultParser();
-			CommandLine cmd = null;
-
-			cmd = parser.parse(options, args);
-			if (cmd.hasOption("port") ) {
-				port = Integer.parseInt(cmd.getOptionValue("PORT"));
-	//			advertisedHostName = cmd.getOptionValue("advertisedname");
-			} else {
-				System.out.println("Please provide  PORT options");
-				System.exit(0);
-			}
-			if(cmd.hasOption("connectionintervallimit")){
-				try{
-					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("connectionintervallimit"));
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}else Server.connectionIntervalLimit=1;
-			if(cmd.hasOption("exchangeinterval")){
-				try{
-					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("exchangeinterval"));
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}else Server.exchangeInterval=600;
-			if(cmd.hasOption("secret")){
-				try{
-					Server.secret=cmd.getOptionValue("secret");
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}else {
-				Random rand = new Random();
-				Server.secret=getRandomString(rand.nextInt(10)+20);
-			}
-			if(cmd.hasOption("advertisedhostname")){
-				try{
-					Server.advertisedHostName=cmd.getOptionValue("advertiedhostname");
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}else {
-				InetAddress gethost;
-				try {
-					gethost = InetAddress.getLocalHost();
-					Server.advertisedHostName=gethost.getHostName();
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-			}
-		}
+//		private static void setServer(String[] args) {
+//			// TODO Auto-generated method stub
+//			Options options = new Options();
+//			AddOptions(options);
+//
+//			// accept args from CMD
+//			CommandLineParser parser = new DefaultParser();
+//			CommandLine cmd = null;
+//
+//			cmd = parser.parse(options, args);
+//			if (cmd.hasOption("port") ) {
+//				port = Integer.parseInt(cmd.getOptionValue("PORT"));
+//	//			advertisedHostName = cmd.getOptionValue("advertisedname");
+//			} else {
+//				System.out.println("Please provide  PORT options");
+//				System.exit(0);
+//			}
+//			if(cmd.hasOption("connectionintervallimit")){
+//				try{
+//					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("connectionintervallimit"));
+//				}catch(Exception e){
+//					e.printStackTrace();
+//				}
+//			}else Server.connectionIntervalLimit=1;
+//			if(cmd.hasOption("exchangeinterval")){
+//				try{
+//					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("exchangeinterval"));
+//				}catch(Exception e){
+//					e.printStackTrace();
+//				}
+//			}else Server.exchangeInterval=600;
+//			if(cmd.hasOption("secret")){
+//				try{
+//					Server.secret=cmd.getOptionValue("secret");
+//				}catch(Exception e){
+//					e.printStackTrace();
+//				}
+//			}else {
+//				Random rand = new Random();
+//				Server.secret=getRandomString(rand.nextInt(10)+20);
+//			}
+//			if(cmd.hasOption("advertisedhostname")){
+//				try{
+//					Server.advertisedHostName=cmd.getOptionValue("advertiedhostname");
+//				}catch(Exception e){
+//					e.printStackTrace();
+//				}
+//			}else {
+//				InetAddress gethost;
+//				try {
+//					gethost = InetAddress.getLocalHost();
+//					Server.advertisedHostName=gethost.getHostName();
+//				} catch (UnknownHostException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} 
+//			}
+//		}
 		private static String getRandomString(int length){
 		     String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		     Random random=new Random();
