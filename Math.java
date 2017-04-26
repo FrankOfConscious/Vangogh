@@ -406,4 +406,4 @@ public class Math {
 		if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;
 		else return false;
 	}
-	}
+}
