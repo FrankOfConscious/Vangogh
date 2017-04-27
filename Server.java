@@ -12,6 +12,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ServerSocketFactory;
 
@@ -124,6 +126,20 @@ import org.json.simple.parser.ParseException;
 			try(ServerSocket server = factory.createServerSocket(port)){
 				System.out.println("Waiting for client connection..");
 				
+				//***********************
+				Thread t2 = new Thread(() -> {
+					try {
+						exchangeServerRec();
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				});
+				t2.start();
+				//**********************
 				// Wait for connections.
 				while(true){
 					Socket client = server.accept();
@@ -334,5 +350,74 @@ import org.json.simple.parser.ParseException;
 		     }
 		     return sb.toString();
 		 }
+		
+		//********************
+		private static void exchangeServerRec() throws UnknownHostException, IOException {
+			
+			
+			// Creates a socket for another server, the socket that will send msg to
+
+			Timer timer = new Timer();
+			TimerTask task = new TimerTask() {
+
+				public void run() {
+					// TODO Auto-generated method stub
+					if (serverRecords.size() == 0) {
+						System.out.println("No record to share");
+					} else {
+						System.out.println("Ready to exchange my records");
+						int selectedIndex = (new Random()).nextInt(serverRecords.size());
+						System.out.println("After random!");
+						String host_ip = serverRecords.get(selectedIndex);
+						String[] host_ip_arr = host_ip.split(":");
+						String host_name = host_ip_arr[0];
+						int ip_add = Integer.parseInt(host_ip_arr[1]);
+						JSONObject exchangeCommand = new JSONObject();
+						String records = "";
+						for (int i = 0; i<serverRecords.size(); i++) {
+							if (i == serverRecords.size() - 1) {
+								records += serverRecords.get(i);
+							} else {
+								records += serverRecords.get(i) + ",";
+							}
+						}
+						exchangeCommand.put("command", "EXCHANGE");
+						exchangeCommand.put("serverList", records);
+						
+						try(Socket randomServer = new Socket(host_name, ip_add)){
+							DataInputStream input = new DataInputStream(randomServer.getInputStream());
+							DataOutputStream output = new DataOutputStream(randomServer.getOutputStream());
+							System.out.println("Ready to share my server records: " + records);
+							output.writeUTF(exchangeCommand.toJSONString());
+							output.flush();
+							System.out.println("Command sent");
+							
+							// Time limit for execution
+							long start = System.currentTimeMillis();
+							long end = start + 5 * 1000;
+							boolean isReachable = false;
+							while(System.currentTimeMillis() < end) {
+								if (input.available() > 0) {
+									isReachable = true;
+									String result = input.readUTF();
+									System.out.println("Response from other server:" + result);
+								}
+							}
+							if (!isReachable) {
+								serverRecords.remove(selectedIndex);
+								System.out.println("Removed unreachable server-" + serverRecords.get(selectedIndex));
+							}
+							
+						} catch (IOException e) {
+							//e.printStackTrace();
+							System.out.println("Record invalid!" + serverRecords.size());
+							serverRecords.remove(selectedIndex);
+						}
+					}
+				}
+				
+			};
+			timer.schedule(task, 0, exchangeInterval * 1000);
+		}
 
 	}
