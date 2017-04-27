@@ -31,8 +31,8 @@ import org.json.simple.parser.ParseException;
 		//static String hostname;
 		// Identifies the user number connected
 		static String advertisedHostName;
-		private static int connectionIntervalLimit=1;
-		private static int exchangeInterval=600;
+		private static int connectionIntervalLimit;
+		private static int exchangeInterval;
 		private static int counter = 0;
 		private static boolean debug;
 		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
@@ -50,6 +50,7 @@ import org.json.simple.parser.ParseException;
 			
 			//////////////////////////////////////////////////////////////
 			// Parse CMD options
+			//
 			Options options = new Options();
 			AddOptions(options);
 
@@ -154,8 +155,8 @@ import org.json.simple.parser.ParseException;
 				// Output Stream
 			    DataOutputStream output = new DataOutputStream(clientSocket.
 			    		getOutputStream());
-			    System.out.println("CLIENT: "+input.readUTF());
-			    output.writeUTF("Server: Hi Client "+counter+" !!!");
+//			    System.out.println("CLIENT: "+input.readUTF());
+//			    output.writeUTF("Server: Hi Client "+counter+" !!!");
 			    
 			    // Receive more data..
 			    while(true){
@@ -167,15 +168,18 @@ import org.json.simple.parser.ParseException;
 			    		for(int i=0;i<result.size();i++){
 				    		
 				    		output.writeUTF(((JSONObject)result.get(i)).toJSONString());
+				    		output.flush();
 				    		System.out.println("What server did:"+result.get(i).toString());/////
 			    		}
-			    		output.flush();
-			    		output.close();
-			    		input.close();
+//			    		output.flush();
+//			    		output.close();
+//			    		input.close();
 			    		break;
 
 			    	}
 			    }
+			    output.close();
+	    		input.close();
 			    
 			} catch (IOException | ParseException e) {
 				e.printStackTrace();

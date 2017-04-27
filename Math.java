@@ -1,9 +1,11 @@
 package Server;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 
 
@@ -68,6 +71,9 @@ public class Math {
 			obj.put("errorMessage", "missing or incorrect type for command");
 			result.add(obj);
 		}
+		JSONObject endOfTag=new JSONObject();
+		endOfTag.put("endOfTransmit",true);
+		result.add(endOfTag);
 		return result;
 	}
 	
@@ -196,7 +202,6 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
-			array.add(result);
 			return array;
 		}
 	}
@@ -204,6 +209,72 @@ public class Math {
 	private static JSONArray queryJSON(JSONObject command){	
 		int resultSize=0;
 		ArrayList<KeyTuple> tempList=new ArrayList<KeyTuple>();
+		////////////////////////////////////////////////////////////////////////////
+		JSONArray relayList=new JSONArray();
+		boolean relaysuccess=false;
+		if(command.containsKey("relay")&&((boolean)command.get("relay"))==true){
+			JSONObject relaycommand=new JSONObject(command);
+			relaycommand.replace("name", "");
+			relaycommand.replace("description", "");
+			relaycommand.replace("relay", false);
+			JSONParser parser = new JSONParser();
+			for(int i=0;i<Server.serverRecords.size();i++){
+				String relayhost=Server.serverRecords.get(i).split(":")[0];
+				int relayport=Integer.parseInt(Server.serverRecords.get(i).split(":")[1]);
+				try (Socket socket2 = new Socket(relayhost, relayport)) {
+
+					// Get I/O streams for connection
+					DataInputStream input2 = new DataInputStream(socket2.getInputStream());
+					DataOutputStream output2 = new DataOutputStream(socket2.getOutputStream());
+//					output2.writeUTF("I am client");
+//					output2.flush();
+					try {
+						output2.writeUTF(relaycommand.toJSONString());
+						output2.flush();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+
+					try {
+						while(true){
+							if(input2.available()>0){
+								String message = input2.readUTF();
+								if(message.equals("{\"endOfTransmit\":true}")) break;
+								System.out.println(message);/////////////////
+								JSONObject relaytemp=(JSONObject)parser.parse(message);
+								if(relaytemp.containsKey("response")&&relaytemp.get("response").equals("success"))
+									relaysuccess=true;
+								if(relaytemp.containsKey("uri")){
+									relayList.add(relaytemp);
+								}
+//								System.out.println(message);
+//								int a=Server.resourceList.size();///
+//								for(int i =0;i<a;i++){/////
+//									System.out.println(Server.resourceList.get(i).toString());////
+//								}////
+							}
+						}
+							input2.close();
+							output2.close();
+							//String message = input.readUTF();
+							//JSONArray results=message./////////////////////
+							//System.out.println(message);
+						} catch (IOException e) {
+							System.out.println("Server seems to have closed connection.");
+						}
+					}
+
+				 catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		}
+		
+		
+		
+		///////////////////////////////////////////////////////////////////////////
 		if(command.containsKey("resourceTemplate")){
 			if(((HashMap) command.get("resourceTemplate")).get("owner").equals("*")){
 				JSONObject obj=new JSONObject();
@@ -211,7 +282,21 @@ public class Math {
 				obj.put("errorMessage", "invalid resourceTemplate");
 				JSONArray result=new JSONArray();
 				result.add(obj);
-				return result;
+				if (!relaysuccess) return result;
+				else{
+					JSONArray relayresult=new JSONArray();
+					JSONObject obj1=new JSONObject();
+					JSONObject obj2=new JSONObject();
+					obj1.put("response", "success");
+					obj2.put("resultSize", relayList.size());
+					relayresult.add(obj1);
+					for(int j=0;j<relayList.size();j++){
+						relayresult.add(relayList.get(j));
+					}
+					relayresult.add(obj2);
+					return relayresult;
+					
+				}
 			}else{
 				for(int i=0;i<Server.resourceList.size();i++){
 					if(queryMatch(Server.resourceList.get(i),command)){
@@ -226,7 +311,21 @@ public class Math {
 			obj.put("errorMessage", "missing resourceTemplate");
 			JSONArray result=new JSONArray();
 			result.add(obj);
-			return result;
+			if (!relaysuccess) return result;
+			else{
+				JSONArray relayresult=new JSONArray();
+				JSONObject obj1=new JSONObject();
+				JSONObject obj2=new JSONObject();
+				obj1.put("response", "success");
+				obj2.put("resultSize", relayList.size());
+				relayresult.add(obj1);
+				for(int j=0;j<relayList.size();j++){
+					relayresult.add(relayList.get(j));
+				}
+				relayresult.add(obj2);
+				return relayresult;
+				
+			}
 		}
 		if(tempList.size()==0){
 			JSONObject obj=new JSONObject();
@@ -236,7 +335,19 @@ public class Math {
 			JSONArray result=new JSONArray();
 			result.add(obj);
 			result.add(obj2);
-			return result;
+			if (!relaysuccess) return result;
+			else{
+				JSONArray relayresult=new JSONArray();
+				JSONObject obj1=new JSONObject();				
+				obj1.put("resultSize", relayList.size());
+				relayresult.add(obj);
+				for(int j=0;j<relayList.size();j++){
+					relayresult.add(relayList.get(j));
+				}
+				relayresult.add(obj1);
+				return relayresult;
+				
+			}
 		}else{
 //			for(int i=0;i<Server.resourceList.size();i++){
 //				if(queryMatch(Server.resourceList.get(i),command))
@@ -250,8 +361,15 @@ public class Math {
 				result.add(( new Resource(tempList.get(i).getObj())).toJSON());
 				
 			}
+			if(relaysuccess){
+				for(int j=0;j<relayList.size();j++){
+					result.add(relayList.get(j));
+				}
+			}
+				
+				
 			obj=new JSONObject();
-			obj.put("resultsize", tempList.size());
+			obj.put("resultsize", tempList.size()+relayList.size());
 			result.add(obj);
 			return result;
 			
@@ -367,22 +485,21 @@ public class Math {
 	
 			String serverRecord=checker((String) command.get("serverList"));
 			String [] RecordArray =serverRecord.split(",");
-// 			for(int i=0;i<RecordArray.length;i++){
-// 				if(!ishostPort(RecordArray[i])){
-// 					JSONObject obj=new JSONObject();
-// 					obj.put("response", "error");
-// 					obj.put("errorMessage", "missing resourceTemplate");
-// 					JSONArray result=new JSONArray();
-// 					result.add(obj);
-// 					return result;
-// 				}
-// 			}
+//			for(int i=0;i<RecordArray.length;i++){
+//				if(!ishostPort(RecordArray[i])){
+//					JSONObject obj=new JSONObject();
+//					obj.put("response", "error");
+//					obj.put("errorMessage", "missing resourceTemplate");
+//					JSONArray result=new JSONArray();
+//					result.add(obj);
+//					return result;
+//				}
+//			}
 			for(int i=0;i<RecordArray.length;i++){
 				String [] hostPort=RecordArray[i].split(":");
 				String hostName=hostPort[0];
 				String port=hostPort[1];
-				if(//!(isIpv4(hostName)||
-				     !isPort(port)){
+				if(!isPort(port)){
 			
 					JSONObject obj=new JSONObject();
 					obj.put("response", "error");
@@ -434,7 +551,7 @@ public class Math {
 	        Matcher matcher = pattern.matcher(HP);
 	        return matcher.matches();
 	    }
-	 private static boolean isPort(String port) {
+	static boolean isPort(String port) {
 		 int portNumber =Integer.parseInt(port);
 	        if(portNumber<0||portNumber>65535){
 	        	return false;

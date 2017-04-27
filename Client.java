@@ -54,8 +54,8 @@ class Client {
 			// Get I/O streams for connection
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-			output.writeUTF("I am client");
-			output.flush();
+//			output.writeUTF("I am client");
+//			output.flush();
 
 			if (cmd.hasOption("fetch")) {
 				JSONFetch(cmd, output, input);
@@ -77,10 +77,10 @@ class Client {
 						String message = input.readUTF();
 						if(message.equals("{\"endOfTransmit\":true}")) break;
 						System.out.println(message);
-						int a=Server.resourceList.size();///
-						for(int i =0;i<a;i++){/////
-						System.out.println(Server.resourceList.get(i).toString());////
-						}////
+//						int a=Server.resourceList.size();///
+//						for(int i =0;i<a;i++){/////
+//						System.out.println(Server.resourceList.get(i).toString());////
+//						}////
 					}
 					}
 					input.close();
@@ -94,7 +94,9 @@ class Client {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Server seems to have closed connection.");
+			//e.printStackTrace();
+			
 		}
 	}
 
@@ -256,7 +258,7 @@ class Client {
 		if (command.hasOption("owner")) {
 			owner = command.getOptionValue("owner");
 			if(owner.equals(".classpath")) owner="*";
-			System.out.println(owner);
+//			System.out.println(owner);
 		}
 		boolean relay = false;
 		if (command.hasOption("relay")) {
