@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,7 +145,7 @@ import org.json.simple.parser.ParseException;
 		
 		
 
-		private static void serveClient(Socket client){
+		private static void serveClient(Socket client) {
 			try(Socket clientSocket = client){
 				
 				// The JSON Parser

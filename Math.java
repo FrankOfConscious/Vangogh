@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public class Math {
 		
 	}
 	
-	static JSONArray parseCommand(JSONObject command,DataOutputStream output) {
+	static JSONArray parseCommand(JSONObject command,DataOutputStream output)  {
 		JSONArray result = new JSONArray();
 		
 		//this solves generic response
@@ -101,17 +103,14 @@ public class Math {
 			return array;
 		} else {
 //			System.out.println("file or http::"+(String)((HashMap) command.get("resource")).get("uri"));//////
-			if(   ((String)((HashMap) command.get("resource")).get("uri")).length()<7
-					||  (((String)((HashMap) command.get("resource")).get("uri")).length()>=7 
-					&& !((String)((HashMap) command.get("resource")).get("uri")).substring(0, 7).equals("file://"))
-					){
+			if(   isURI((String)((HashMap) command.get("resource")).get("uri"))){
 //			System.out.println("i am in if");
 				
 				for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
 					if (Server.resourceList.get(i).ifduplicated(command)) {
 						result.put("response", "error");
-						result.put("errorMessage", "cannot publish resource");
+						result.put("errorMessage", "cannot publish resource1");
 						array.add(result);
 						return array;
 					}
@@ -136,7 +135,7 @@ public class Math {
 			
 			}else{
 				result.put("response", "error");
-				result.put("errorMessage", "cannot publish resource");
+				result.put("errorMessage", "cannot publish resource2");
 				array.add(result);
 				return array;
 				
@@ -177,10 +176,10 @@ public class Math {
 			}
 		}
 		//this if clause check if the file scheme is "file"
-		if(!((String)((HashMap) command.get("resource")).get("uri")).substring(0, 4).equals("file") ||
-				((String)((HashMap) command.get("resource")).get("uri")).charAt(0) == '/') {
+		String temp=((String)((HashMap) command.get("resource")).get("uri"));
+		if( (temp==null || temp.equals("") ||temp.length()<5 || !temp.substring(0,5).equals("file:") )){
 			result.put("response", "error");
-			result.put("errorMessage", "cannot publish resource");
+			result.put("errorMessage", "cannot share resource");
 			array.add(result);
 			return array;
 		} else {
@@ -202,6 +201,7 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
+			array.add(result);
 			return array;
 		}
 	}
@@ -379,7 +379,7 @@ public class Math {
 		
 	}
 	
-	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output) {
+	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output){
 		JSONArray result = new JSONArray();
 		JSONObject obj = new JSONObject();
 		if (!command.containsKey("resourceTemplate")) {
@@ -395,7 +395,15 @@ public class Math {
 			if (Server.resourceList.get(i).getChannel().equals(channel) &&
 					Server.resourceList.get(i).getUri().equals(uri)) {
 				//if the command matches a KeyTuple storeed in the server, the obj in that KeyTuple will be returned
-				File f = new File(Server.resourceList.get(i).getUri());
+				URI uriIns = null;
+				try {
+					uriIns = new URI(Server.resourceList.get(i).getUri());
+				} catch (URISyntaxException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				System.out.println(uriIns.getPath());
+				File f = new File(uriIns.getPath());
 				if (f.exists()) {
 					JSONObject obj1 = new JSONObject();
 					JSONObject obj2 = Server.resourceList.get(i).toJSON();
@@ -408,6 +416,10 @@ public class Math {
 					result.add(obj2);
 					result.add(obj3);
 					try{
+						JSONObject fileSize = new JSONObject();
+						fileSize.put("resourceSize", f.length());
+						fileSize.put("uri", uriIns.toString());
+						output.writeUTF(fileSize.toJSONString());
 						RandomAccessFile byteFile = new RandomAccessFile(f, "r");
 						byte[] sendingBuffer = new byte[1024*1024];
 						int num;
@@ -428,8 +440,7 @@ public class Math {
 		obj.put("errorMessage", "invalid resourceTemplate");
 		result.add(obj);
 		return result;
-		
-	}
+		}
 
 	private static JSONArray removeJSON(JSONObject command){
 		JSONObject result= new JSONObject();
@@ -558,6 +569,17 @@ public class Math {
 	        }
 	        return true;
 	    }
+	private static boolean isURI(String str){
+		if(str==null ||str.equals("")) return false;
+		else{
+			int length=str.length();
+			if(length<4) return false;
+			if(length<5){if(str.substring(0,4).equals("ftp:")||str.substring(0,4).equals("jar:")) return true; else return false;}
+			if(length<6){if(str.substring(0,4).equals("ftp:") || str.substring(0,5).equals("http:")||str.substring(0,4).equals("jar:")) return true; else return false;}
+			if(length>=6){if(str.substring(0,4).equals("ftp:") || str.substring(0,5).equals("http:")||str.substring(0,6).equals("https:")||str.substring(0,4).equals("jar:")) return true; else return false;}
+		}
+		return false;
+	}
 	
 	
 	private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {

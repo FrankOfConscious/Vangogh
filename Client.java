@@ -143,18 +143,30 @@ class Client {
 			JSONParser parser = new JSONParser();
 			while (true) {
 				if (input.available() > 0) {
-					String result = input.readUTF();// get input stream from
-													// server
+					String result = input.readUTF();// get input stream from server
+					System.out.println(result);
+					
+					if(result.contains("Hi")) continue;
+					
+					if(result.contains("response")) continue;
+					
+					if(result.contains("name")) continue;
+					
+					if(result.contains("resultSize")) break;
+					
 					JSONObject cmd = new JSONObject();
 					try {
 						cmd = (JSONObject) parser.parse(result);
 						// Create a RandomAccessFile to read and write the
 						// output file.
-						RandomAccessFile downloadingFile = new RandomAccessFile("file", "rw");
+						String uriStr = (String)cmd.get("uri");
+						String fileName = uriStr.substring( uriStr.lastIndexOf('/')+1, uriStr.length() );
+						RandomAccessFile downloadingFile = new RandomAccessFile(fileName, "rw");
 
 						// Find out how much size is remaining to get from the
 						// server.
-						long fileSizeRemaining = (Long) cmd.get("resultSize");
+						
+						long fileSizeRemaining = (Long) cmd.get("resourceSize");
 
 						int chunkSize = setChunkSize(fileSizeRemaining);
 
@@ -182,7 +194,6 @@ class Client {
 								break;
 							}
 						}
-						System.out.println(result);
 						downloadingFile.close();
 					} catch (org.json.simple.parser.ParseException e) {
 						// TODO Auto-generated catch block
