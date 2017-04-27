@@ -196,6 +196,7 @@ public class Math {
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
+			array.add(result);
 			return array;
 		}
 	}
@@ -366,21 +367,22 @@ public class Math {
 	
 			String serverRecord=checker((String) command.get("serverList"));
 			String [] RecordArray =serverRecord.split(",");
-			for(int i=0;i<RecordArray.length;i++){
-				if(!ishostPort(RecordArray[i])){
-					JSONObject obj=new JSONObject();
-					obj.put("response", "error");
-					obj.put("errorMessage", "missing resourceTemplate");
-					JSONArray result=new JSONArray();
-					result.add(obj);
-					return result;
-				}
-			}
+// 			for(int i=0;i<RecordArray.length;i++){
+// 				if(!ishostPort(RecordArray[i])){
+// 					JSONObject obj=new JSONObject();
+// 					obj.put("response", "error");
+// 					obj.put("errorMessage", "missing resourceTemplate");
+// 					JSONArray result=new JSONArray();
+// 					result.add(obj);
+// 					return result;
+// 				}
+// 			}
 			for(int i=0;i<RecordArray.length;i++){
 				String [] hostPort=RecordArray[i].split(":");
 				String hostName=hostPort[0];
 				String port=hostPort[1];
-				if(!(isIpv4(hostName)||!isPort(port))){
+				if(//!(isIpv4(hostName)||
+				     !isPort(port)){
 			
 					JSONObject obj=new JSONObject();
 					obj.put("response", "error");
