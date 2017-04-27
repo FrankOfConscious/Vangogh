@@ -1,0 +1,168 @@
+	-client 
+
+	@SuppressWarnings({ "unchecked" })
+	private static void JSONFetch(CommandLine command, DataOutputStream output, DataInputStream input) {
+		String name = "";
+		if (command.hasOption("name")) {
+			name = command.getOptionValue("name");
+		}
+		String tags="";
+		if(command.hasOption("tags")){
+			tags=command.getOptionValue("tags");
+		}
+		String des = "";
+		if (command.hasOption("description")) {
+			des = command.getOptionValue("description");
+		}
+		String uri = "";
+		if (command.hasOption("uri")) {
+			uri = command.getOptionValue("uri");
+		}
+		String channel = "";
+		if (command.hasOption("channel")) {
+			channel = command.getOptionValue("channel");
+		}
+		String owner = "";
+		if (command.hasOption("owner")) {
+			owner = command.getOptionValue("owner");
+		}
+		JSONObject resourceTemplate = new JSONObject();
+		JSONObject commandObj = new JSONObject();
+		resourceTemplate.put("name", name);
+		resourceTemplate.put("description", des);
+		resourceTemplate.put("uri", uri);
+		resourceTemplate.put("channel", channel);
+		resourceTemplate.put("owner", owner);
+		resourceTemplate.put("ezserver", null);
+		commandObj.put("command", "FETCH");
+		commandObj.put("resourceTemplate", resourceTemplate);
+
+		try {
+			output.writeUTF(commandObj.toJSONString());
+			output.flush();
+			JSONParser parser = new JSONParser();
+			while (true) {
+				if (input.available() > 0) {
+					String result = input.readUTF();// get input stream from server
+					System.out.println(result);
+					
+					if(result.contains("Hi")) continue;
+					
+					if(result.contains("response")) continue;
+					
+					if(result.contains("name")) continue;
+					
+					if(result.contains("resultSize")) break;
+					
+					JSONObject cmd = new JSONObject();
+					try {
+						cmd = (JSONObject) parser.parse(result);
+						// Create a RandomAccessFile to read and write the
+						// output file.
+						String uriStr = (String)cmd.get("uri");
+						String fileName = uriStr.substring( uriStr.lastIndexOf('/')+1, uriStr.length() );
+						RandomAccessFile downloadingFile = new RandomAccessFile(fileName, "rw");
+
+						// Find out how much size is remaining to get from the
+						// server.
+						
+						long fileSizeRemaining = (Long) cmd.get("resourceSize");
+
+						int chunkSize = setChunkSize(fileSizeRemaining);
+
+						// Represents the receiving buffer
+						byte[] receiveBuffer = new byte[chunkSize];
+
+						// Variable used to read if there are remaining size
+						// left to read.
+						int num;
+
+						while ((num = input.read(receiveBuffer)) > 0) {
+							// Write the received bytes into the
+							// RandomAccessFile
+							downloadingFile.write(Arrays.copyOf(receiveBuffer, num));
+
+							// Reduce the file size left to read..
+							fileSizeRemaining -= num;
+
+							// Set the chunkSize again
+							chunkSize = setChunkSize(fileSizeRemaining);
+							receiveBuffer = new byte[chunkSize];
+
+							// If you're done then break
+							if (fileSizeRemaining == 0) {
+								break;
+							}
+						}
+						downloadingFile.close();
+					} catch (org.json.simple.parser.ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	-server
+
+	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output) throws URISyntaxException {
+		JSONArray result = new JSONArray();
+		JSONObject obj = new JSONObject();
+		if (!command.containsKey("resourceTemplate")) {
+			obj.put("response", "error");
+			obj.put("errorMessage", "missing resourceTemplate");
+			result.add(obj);
+			return result;
+		}	
+		String channel = (String) ((HashMap) command.get("resourceTemplate")).get("channel");
+		String uri = (String) ((HashMap) command.get("resourceTemplate")).get("uri");
+		for (int i = 0; i < Server.resourceList.size(); i++) {
+			
+			if (Server.resourceList.get(i).getChannel().equals(channel) &&
+					Server.resourceList.get(i).getUri().equals(uri)) {
+				//if the command matches a KeyTuple storeed in the server, the obj in that KeyTuple will be returned
+				URI uriIns = new URI(Server.resourceList.get(i).getUri());
+				System.out.println(uriIns.getPath());
+				File f = new File(uriIns.getPath());
+				if (f.exists()) {
+					JSONObject obj1 = new JSONObject();
+					JSONObject obj2 = Server.resourceList.get(i).toJSON();
+					JSONObject obj3 = new JSONObject();
+					
+					obj1.put("response", "success");
+					obj2.put("resourceSize", f.length());
+					obj3.put("resultSize", 1);
+					result.add(obj1);
+					result.add(obj2);
+					result.add(obj3);
+					try{
+						JSONObject fileSize = new JSONObject();
+						fileSize.put("resourceSize", f.length());
+						fileSize.put("uri", uriIns.toString());
+						output.writeUTF(fileSize.toJSONString());
+						RandomAccessFile byteFile = new RandomAccessFile(f, "r");
+						byte[] sendingBuffer = new byte[1024*1024];
+						int num;
+						while((num = byteFile.read(sendingBuffer))>0) {
+							output.write(Arrays.copyOf(sendingBuffer, num));
+						}
+						byteFile.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return result;
+				}
+				
+			}
+		}
+		
+		obj.put("response", "error");
+		obj.put("errorMessage", "invalid resourceTemplate");
+		result.add(obj);
+		return result;
+		}
