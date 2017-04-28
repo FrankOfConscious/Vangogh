@@ -7,6 +7,9 @@ import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.logging.*;
+
+import org.apache.log4j.Logger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -23,9 +26,12 @@ import Server.Server;
 class Client {
 	private static String ip;
 	private static int port;
+	private static boolean debug = false;
+	
+	private static final Logger log = Logger.getLogger(Logger.class);
 
 	public static void main(String[] args) {
-		System.out.println("Client has started.");
+		log.info("Client has started.");
 
 		// Parse CMD options
 		Options options = new Options();
@@ -38,15 +44,22 @@ class Client {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		if (cmd.hasOption("PORT") && cmd.hasOption("IP")) {
-			port = Integer.parseInt(cmd.getOptionValue("PORT"));
-			ip = cmd.getOptionValue("IP");
-		} else {
-			System.out.println("Please provide IP and PORT options");
+			System.out.println("It's not an internal or external command.");
+			//e.printStackTrace();
 			System.exit(0);
 		}
+		if (cmd.hasOption("port") && cmd.hasOption("ip")) {
+			port = Integer.parseInt(cmd.getOptionValue("port"));
+			ip = cmd.getOptionValue("ip");
+		} else {
+			log.warn("Please provide IP and PORT options");
+			System.exit(0);
+		}
+		if(cmd.hasOption("debug")) {
+			debug = true;
+		}
+		
+		
 
 		// connect to a server socket
 		try (Socket socket = new Socket(ip, port)) {
@@ -56,50 +69,71 @@ class Client {
 			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
 //			output.writeUTF("I am client");
 //			output.flush();
+			JSONObject raw=new JSONObject();
 
 			if (cmd.hasOption("fetch")) {
-				JSONFetch(cmd, output, input);
+//				JSONFetch(cmd, output, input);
+				raw.put("command", "FETCH");
 			} else {
 				if (cmd.hasOption("publish")) {
-					JSONPublish(cmd, output);
+//					JSONPublish(cmd, output);
+					raw.put("command", "PUBLISH");
 				} else if (cmd.hasOption("remove")) {
-					JSONRemove(cmd, output);
+//					JSONRemove(cmd, output);
+					raw.put("command", "REMOVE");
 				} else if (cmd.hasOption("share")) {
-					JSONShare(cmd, output);
+//					JSONShare(cmd, output);
+					raw.put("command", "SHARE");
 				} else if (cmd.hasOption("exchange")) {
-					JSONExchange(cmd, output);
+//					JSONExchange(cmd, output);
+					raw.put("command", "EXCHANGE");
 				} else if (cmd.hasOption("query")) {
-					JSONQuery(cmd, output);
+//					JSONQuery(cmd, output);
+					raw.put("command", "QUERY");
 				}
-				try {
-					while(true){
-						if(input.available()>0){
+			if(cmd.hasOption("channel")) raw.put("channel",cmd.getOptionValue("channel") );
+			if(cmd.hasOption("description")) raw.put("description",cmd.getOptionValue("description") );
+			if(cmd.hasOption("name")) raw.put("name",cmd.getOptionValue("name") );
+			if(cmd.hasOption("owner")) raw.put("owner",cmd.getOptionValue("owner") );
+			if(cmd.hasOption("secret")) raw.put("secret",cmd.getOptionValue("secret") );
+			if(cmd.hasOption("servers")) raw.put("servers",cmd.getOptionValue("servers") );
+			if(cmd.hasOption("tags")) raw.put("tags",cmd.getOptionValue("tags") );
+			if(cmd.hasOption("uri")) raw.put("uri",cmd.getOptionValue("uri") );
+			if(cmd.hasOption("relay")) raw.put("relay",cmd.getOptionValue("relay") );
+
+			try{
+				output.writeUTF(raw.toJSONString());
+				output.flush();
+			}catch(IOException e){
+				e.printStackTrace();
+				System.exit(0);
+				
+			}
+			try {
+				while(true){
+					if(input.available()>0){
 						String message = input.readUTF();
 						if(message.equals("{\"endOfTransmit\":true}")) break;
-						System.out.println(message);
-//						int a=Server.resourceList.size();///
-//						for(int i =0;i<a;i++){/////
-//						System.out.println(Server.resourceList.get(i).toString());////
-//						}////
+						log.info("RECEIVED: " + message);
+
 					}
-					}
-					input.close();
-					output.close();
-					//String message = input.readUTF();
-					//JSONArray results=message./////////////////////
-					//System.out.println(message);
-				} catch (IOException e) {
-					System.out.println("Server seems to have closed connection.");
+				}
+				input.close();
+				output.close();
+			} catch (IOException e) {
+					log.warn("Server seems to have closed connection.");
+					System.exit(0);
 				}
 			}
 
 		} catch (Exception e) {
-			System.out.println("Server seems to have closed connection.");
+			log.warn("Server seems to have closed connection.");
+			System.exit(0);
 			//e.printStackTrace();
 			
 		}
 	}
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	@SuppressWarnings({ "unchecked" })
 	private static void JSONFetch(CommandLine command, DataOutputStream output, DataInputStream input) {
 		String name = "";
@@ -140,13 +174,16 @@ class Client {
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
+			log.info("fetching from " + ip + ":" + port);
+			if(debug) log.debug("SENT: " + commandObj.toJSONString());
+			
 			JSONParser parser = new JSONParser();
 			while (true) {
 				if (input.available() > 0) {
 					String result = input.readUTF();// get input stream from server
-					System.out.println(result);
+					//System.out.println(result);
 					
-					if(result.contains("Hi")) continue;
+					if(debug) log.info("RECEIVED: " + result);
 					
 					if(result.contains("response")) continue;
 					
@@ -237,6 +274,8 @@ class Client {
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
+			log.info("exchange to " + ip + ":" + port);
+			if(debug) log.debug("SENT: " + commandObj.toJSONString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -290,6 +329,8 @@ class Client {
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
+			log.info("querying from " + ip + ":" + port);
+			if(debug) log.debug("SENT: " + commandObj.toJSONString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -339,6 +380,8 @@ class Client {
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
+			log.info("publishing to " + ip + ":" + port);
+			if(debug) log.debug("SENT: " + commandObj.toJSONString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -380,6 +423,8 @@ class Client {
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
+			log.info("removing to " + ip + ":" + port);
+			if(debug) log.debug("SENT: " + commandObj.toJSONString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -431,6 +476,8 @@ class Client {
 		try {
 			output.writeUTF(commandObj.toJSONString());
 			output.flush();
+			log.info("sharing to " + ip + ":" + port);
+			if(debug) log.debug("SENT: " + commandObj.toJSONString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -438,8 +485,8 @@ class Client {
 	}
 
 	public static void AddOptions(Options options) {
-		options.addOption("PORT", true, "Server port");
-		options.addOption("IP", true, "Server IP address");
+		options.addOption("port", true, "Server port");
+		options.addOption("ip", true, "Server IP address");
 		options.addOption("channel", true, "channel");
 		options.addOption("debug", false, "print debug information");
 		options.addOption("description", true, "resource description");
