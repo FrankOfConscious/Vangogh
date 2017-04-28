@@ -152,7 +152,7 @@ public class Math {
 		}
 	}
 	
-	private static JSONArray shareJSON(JSONObject command) {
+private static JSONArray shareJSON(JSONObject command) {
 		JSONObject result = new JSONObject();
 		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
@@ -163,13 +163,11 @@ public class Math {
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource and\\/or secret");
 			array.add(result);
-			debug(array);
 			return array;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
 			array.add(result);
-			debug(array);
 			return array;
 		} else {
 			//this checks whether the secret is correct
@@ -183,17 +181,20 @@ public class Math {
 				result.put("response", "error");
 				result.put("errorMessage", "incorrect secret");
 				array.add(result);
-				debug(array);
 				return array;
 			}
 		}
 		//this if clause check if the file scheme is "file"
 		String temp=((String)((HashMap) command.get("resource")).get("uri"));
-		if( (temp==null || temp.equals("") ||temp.length()<5 || !temp.substring(0,5).equals("file:") )){
+		if( (temp==null || temp.equals("") ||temp.length()<=7 || !temp.substring(0,7).equals("file://") )){
 			result.put("response", "error");
 			result.put("errorMessage", "cannot share resource");
 			array.add(result);
-			debug(array);
+			return array;
+		} else if (!(new File(temp.substring(7))).exists()){
+			result.put("response", "error");
+			result.put("errorMessage", "invalid resource");
+			array.add(result);
 			return array;
 		} else {
 			for (int i = 0; i < Server.resourceList.size(); i++) {
@@ -202,7 +203,6 @@ public class Math {
 					result.put("response", "error");
 					result.put("errorMessage", "cannot share resource");
 					array.add(result);
-					debug(array);
 					return array;
 				}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
@@ -210,14 +210,12 @@ public class Math {
 					Server.resourceList.get(i).overwrites(command);
 					result.put("response", "success");
 					array.add(result);
-					debug(array);
 					return array;
 				}	
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
 			array.add(result);
-			debug(array);
 			return array;
 		}
 	}
