@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,7 +36,7 @@ public class Math {
 		return (x * y);
 		
 	}
-	
+	private static final Logger log = Logger.getLogger(Logger.class);
 	static JSONArray parseCommand(JSONObject command,DataOutputStream output)  {
 		JSONArray result = new JSONArray();
 		
@@ -80,6 +82,7 @@ public class Math {
 	}
 	
 	private static JSONArray publishJSON(JSONObject command) {
+	
 		JSONObject result = new JSONObject();
 		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
@@ -89,29 +92,33 @@ public class Math {
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
 			array.add(result);
+			debug(array);
 			return array;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
 			array.add(result);
+			debug(array);
+			
 			return array;
 		} else if(((String)((HashMap) command.get("resource")).get("uri")).equals("")) {
 			//this if clause check if the file scheme is "file"
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
 			array.add(result);
+			debug(array);
 			return array;
 		} else {
 //			System.out.println("file or http::"+(String)((HashMap) command.get("resource")).get("uri"));//////
 			if(   isURI((String)((HashMap) command.get("resource")).get("uri"))){
 //			System.out.println("i am in if");
-				
 				for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
 					if (Server.resourceList.get(i).ifduplicated(command)) {
 						result.put("response", "error");
 						result.put("errorMessage", "cannot publish resource1");
 						array.add(result);
+						debug(array);
 						return array;
 					}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
@@ -119,6 +126,7 @@ public class Math {
 						Server.resourceList.get(i).overwrites(command);
 						result.put("response", "success(overwrites)");/////
 						array.add(result);
+						debug(array);
 						return array;
 				}	
 //					System.out.println("in for");
@@ -131,6 +139,7 @@ public class Math {
 			}
 			result.put("response", "success");
 			array.add(result);
+			debug(array);
 			return array;
 			
 			}else{
@@ -154,11 +163,13 @@ public class Math {
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource and\\/or secret");
 			array.add(result);
+			debug(array);
 			return array;
 		} else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
 			array.add(result);
+			debug(array);
 			return array;
 		} else {
 			//this checks whether the secret is correct
@@ -172,6 +183,7 @@ public class Math {
 				result.put("response", "error");
 				result.put("errorMessage", "incorrect secret");
 				array.add(result);
+				debug(array);
 				return array;
 			}
 		}
@@ -181,6 +193,7 @@ public class Math {
 			result.put("response", "error");
 			result.put("errorMessage", "cannot share resource");
 			array.add(result);
+			debug(array);
 			return array;
 		} else {
 			for (int i = 0; i < Server.resourceList.size(); i++) {
@@ -189,6 +202,7 @@ public class Math {
 					result.put("response", "error");
 					result.put("errorMessage", "cannot share resource");
 					array.add(result);
+					debug(array);
 					return array;
 				}
 				//this checks if there is resource with same channel, uri and owner, replace the obj
@@ -196,12 +210,14 @@ public class Math {
 					Server.resourceList.get(i).overwrites(command);
 					result.put("response", "success");
 					array.add(result);
+					debug(array);
 					return array;
 				}	
 			}
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
 			result.put("response", "success");
 			array.add(result);
+			debug(array);
 			return array;
 		}
 	}
@@ -282,7 +298,10 @@ public class Math {
 				obj.put("errorMessage", "invalid resourceTemplate");
 				JSONArray result=new JSONArray();
 				result.add(obj);
-				if (!relaysuccess) return result;
+				if (!relaysuccess) {
+					debug(result);
+					return result;
+				}
 				else{
 					JSONArray relayresult=new JSONArray();
 					JSONObject obj1=new JSONObject();
@@ -294,6 +313,7 @@ public class Math {
 						relayresult.add(relayList.get(j));
 					}
 					relayresult.add(obj2);
+					debug(relayresult);
 					return relayresult;
 					
 				}
@@ -311,7 +331,10 @@ public class Math {
 			obj.put("errorMessage", "missing resourceTemplate");
 			JSONArray result=new JSONArray();
 			result.add(obj);
-			if (!relaysuccess) return result;
+			if (!relaysuccess) {
+				debug(result);
+				return result;
+			}
 			else{
 				JSONArray relayresult=new JSONArray();
 				JSONObject obj1=new JSONObject();
@@ -323,6 +346,7 @@ public class Math {
 					relayresult.add(relayList.get(j));
 				}
 				relayresult.add(obj2);
+				debug(relayresult);
 				return relayresult;
 				
 			}
@@ -335,7 +359,10 @@ public class Math {
 			JSONArray result=new JSONArray();
 			result.add(obj);
 			result.add(obj2);
-			if (!relaysuccess) return result;
+			if (!relaysuccess) {
+				debug(result);
+				return result;
+			}
 			else{
 				JSONArray relayresult=new JSONArray();
 				JSONObject obj1=new JSONObject();				
@@ -345,6 +372,7 @@ public class Math {
 					relayresult.add(relayList.get(j));
 				}
 				relayresult.add(obj1);
+				debug(relayresult);
 				return relayresult;
 				
 			}
@@ -371,6 +399,7 @@ public class Math {
 			obj=new JSONObject();
 			obj.put("resultsize", tempList.size()+relayList.size());
 			result.add(obj);
+			debug(result);
 			return result;
 			
 		}
@@ -386,6 +415,7 @@ public class Math {
 			obj.put("response", "error");
 			obj.put("errorMessage", "missing resourceTemplate");
 			result.add(obj);
+			debug(result);
 			return result;
 		}	
 		String channel = (String) ((HashMap) command.get("resourceTemplate")).get("channel");
@@ -430,6 +460,7 @@ public class Math {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+					debug(result);
 					return result;
 				}
 				
@@ -439,6 +470,7 @@ public class Math {
 		obj.put("response", "error");
 		obj.put("errorMessage", "invalid resourceTemplate");
 		result.add(obj);
+		debug(result);
 		return result;
 		}
 
@@ -452,11 +484,13 @@ public class Math {
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
 			array.add(result);
+			debug(array);
 			return array;
 		}else if(((HashMap) command.get("resource")).get("owner").equals("*")){
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
 			array.add(result);
+			debug(array);
 			return array;
 		}else {
 			boolean removed=false;
@@ -479,6 +513,7 @@ public class Math {
 				result.put("errorMessage", "cannot remove resource(not exsit)");	
 			}
 			array.add(result);
+			debug(array);
 			return array;
 			
 		}
@@ -491,6 +526,7 @@ public class Math {
 			obj.put("errorMessage", "missing or invalid server list");
 			JSONArray result=new JSONArray();
 			result.add(obj);
+			debug(result);
 			return result;
 		}else {
 	
@@ -517,6 +553,7 @@ public class Math {
 					obj.put("errorMessage", "missing resourceTemplate");
 					JSONArray result=new JSONArray();
 					result.add(obj);
+					debug(result);
 					return result;
 				}
 				boolean exist=false;
@@ -535,7 +572,8 @@ public class Math {
 		JSONObject obj=new JSONObject();
 		obj.put("response", "success");
 		JSONArray result=new JSONArray();
-		result.add(obj);	
+		result.add(obj);
+		debug(result);
 		return result;
 		
 	}
@@ -633,4 +671,26 @@ public class Math {
 		if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;
 		else return false;
 	}
+	private static void debug(JSONArray array) {
+		if(Server.debug){
+			if(array.contains("error")){
+				log.error("SENT:"+array.toJSONString());
+			}else{
+				log.debug("SENT:"+array.toJSONString());
+			}
+		
+		}
+	}
+//	public static void SetLogger(){
+//
+//
+//
+//		log.setLevel(Level.FINE);
+//
+//
+//		log.getHandlers()[0].setLevel(Level.FINE);
+//
+//
+//	}
+	
 	}
