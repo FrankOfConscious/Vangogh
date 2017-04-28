@@ -21,6 +21,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -37,7 +38,8 @@ import org.json.simple.parser.ParseException;
 		private static int connectionIntervalLimit;
 		private static int exchangeInterval;
 		private static int counter = 0;
-		private static boolean debug;
+		static boolean debug = false;
+		private static final Logger log = Logger.getLogger(Logger.class);
 		public static  ArrayList< KeyTuple> resourceList=new ArrayList<KeyTuple>();
 		static String secret = null;
 		static ArrayList<String> serverRecords=new ArrayList<String>();
@@ -111,7 +113,9 @@ import org.json.simple.parser.ParseException;
 					e.printStackTrace();
 				} 
 			}
-			if(cmd.hasOption("debug")) Server.debug=true;
+			if(cmd.hasOption("debug")) {
+				Server.debug=true;
+			}	
 			else debug=false;
 //			System.out.println(Server.advertisedHostName);
 //			System.out.println(Server.connectionIntervalLimit);
@@ -176,17 +180,32 @@ import org.json.simple.parser.ParseException;
 //			    output.writeUTF("Server: Hi Client "+counter+" !!!");
 			    
 			    // Receive more data..
+			    if(Server.debug){
+					log.info("Starting the EZshare Server");
+					log.info("using secret: "+Server.secret);
+					log.info("using advertiesd hostname: "+advertisedHostName);
+					log.info("bound to port"+port);
+					log.info("started");
+					}
 			    while(true){
 			    	if(input.available() > 0){
 			    		// Attempt to convert read data to JSON
 			    		JSONObject command = (JSONObject) parser.parse(input.readUTF());
-			    		System.out.println("COMMAND RECEIVED: "+command.toJSONString());//////
+			    		if(Server.debug){
+			    			log.debug("COMMAND RECEIVED: "+command.toJSONString());//////
+			    		}else{
+			    			System.out.println("COMMAND RECEIVED: "+command.toJSONString());
+			    		}
 			    		JSONArray result = Math.parseCommand(command, output);
 			    		for(int i=0;i<result.size();i++){
 				    		
 				    		output.writeUTF(((JSONObject)result.get(i)).toJSONString());
 				    		output.flush();
-				    		System.out.println("What server did:"+result.get(i).toString());/////
+				    		if(Server.debug){
+				    			log.info("What server did:"+result.get(i).toString());/////
+				    		}else{
+				    			System.out.println("What server did:"+result.get(i).toString());/////
+				    		}
 			    		}
 //			    		output.flush();
 //			    		output.close();
@@ -195,6 +214,7 @@ import org.json.simple.parser.ParseException;
 
 			    	}
 			    }
+			    
 			    output.close();
 	    		input.close();
 			    
