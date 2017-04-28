@@ -1,0 +1,19 @@
+boolean connected = false;
+				long timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
+				
+				while(true){
+					
+					if (System.currentTimeMillis() < timeLimit && connected) {
+						continue;
+					}
+					
+					Socket client = server.accept();
+					counter++;
+					System.out.println("Client "+counter+": Applying for connection!");
+					// Start a new thread for a connection
+					Thread t = new Thread(() -> serveClient(client));
+					t.start();
+					
+					connected = true;
+					timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
+				}
