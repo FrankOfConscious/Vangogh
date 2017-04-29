@@ -2,11 +2,13 @@ package Client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.*;
 
 import org.apache.log4j.Logger;
@@ -109,11 +111,16 @@ class Client {
 				System.exit(0);
 				
 			}
+			 boolean fetchFlag=false;
 			try {
 				while(true){
 					if(input.available()>0){
 						String message = input.readUTF();
 						if(message.equals("{\"endOfTransmit\":true}")) break;
+						JSONParser parser1=new JSONParser();
+						if(((JSONObject) parser1.parse(message)).containsKey("resourceSize"))
+							
+							doFetch(message,input);
 						log.info("RECEIVED: " + message);
 
 					}
@@ -133,87 +140,46 @@ class Client {
 			
 		}
 	}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	@SuppressWarnings({ "unchecked" })
-	private static void JSONFetch(CommandLine command, DataOutputStream output, DataInputStream input) {
-		String name = "";
-		if (command.hasOption("name")) {
-			name = command.getOptionValue("name");
-		}
-		String tags="";
-		if(command.hasOption("tags")){
-			tags=command.getOptionValue("tags");
-		}
-		String des = "";
-		if (command.hasOption("description")) {
-			des = command.getOptionValue("description");
-		}
-		String uri = "";
-		if (command.hasOption("uri")) {
-			uri = command.getOptionValue("uri");
-		}
-		String channel = "";
-		if (command.hasOption("channel")) {
-			channel = command.getOptionValue("channel");
-		}
-		String owner = "";
-		if (command.hasOption("owner")) {
-			owner = command.getOptionValue("owner");
-		}
-		JSONObject resourceTemplate = new JSONObject();
-		JSONObject commandObj = new JSONObject();
-		resourceTemplate.put("name", name);
-		resourceTemplate.put("description", des);
-		resourceTemplate.put("uri", uri);
-		resourceTemplate.put("channel", channel);
-		resourceTemplate.put("owner", owner);
-		resourceTemplate.put("ezserver", null);
-		commandObj.put("command", "FETCH");
-		commandObj.put("resourceTemplate", resourceTemplate);
-
-		try {
-			output.writeUTF(commandObj.toJSONString());
-			output.flush();
-			log.info("fetching from " + ip + ":" + port);
-			if(debug) log.debug("SENT: " + commandObj.toJSONString());
+	
+	private static void doFetch(String result, DataInputStream input) {
+		// TODO Auto-generated method stub
+		while (true) {
 			
-			JSONParser parser = new JSONParser();
-			while (true) {
-				if (input.available() > 0) {
-					String result = input.readUTF();// get input stream from server
-					//System.out.println(result);
-					
-					if(debug) log.info("RECEIVED: " + result);
-					
-					if(result.contains("response")) continue;
-					
-					if(result.contains("name")) continue;
-					
-					if(result.contains("resultSize")) break;
-					
-					JSONObject cmd = new JSONObject();
+
+				
+				JSONObject cmd = new JSONObject();
+				try {
+					JSONParser parser = new JSONParser();;
+					cmd = (JSONObject) parser.parse(result);
+					// Create a RandomAccessFile to read and write the
+					// output file.
+					String uriStr = (String)cmd.get("uri");
+					String fileName = uriStr.substring( uriStr.lastIndexOf('/')+1, uriStr.length() );
+					RandomAccessFile downloadingFile = null;
 					try {
-						cmd = (JSONObject) parser.parse(result);
-						// Create a RandomAccessFile to read and write the
-						// output file.
-						String uriStr = (String)cmd.get("uri");
-						String fileName = uriStr.substring( uriStr.lastIndexOf('/')+1, uriStr.length() );
-						RandomAccessFile downloadingFile = new RandomAccessFile(fileName, "rw");
+						downloadingFile = new RandomAccessFile(fileName, "rw");
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
-						// Find out how much size is remaining to get from the
-						// server.
-						
-						long fileSizeRemaining = (Long) cmd.get("resourceSize");
+					// Find out how much size is remaining to get from the
+					// server.
+					
+					long fileSizeRemaining = (Long) cmd.get("resourceSize");
 
-						int chunkSize = setChunkSize(fileSizeRemaining);
+					int chunkSize = setChunkSize(fileSizeRemaining);
 
-						// Represents the receiving buffer
-						byte[] receiveBuffer = new byte[chunkSize];
+					// Represents the receiving buffer
+					byte[] receiveBuffer = new byte[chunkSize];
 
-						// Variable used to read if there are remaining size
-						// left to read.
-						int num;
+					// Variable used to read if there are remaining size
+					// left to read.
+					int num;
 
+					try {
 						while ((num = input.read(receiveBuffer)) > 0) {
 							// Write the received bytes into the
 							// RandomAccessFile
@@ -231,19 +197,27 @@ class Client {
 								break;
 							}
 						}
-						downloadingFile.close();
-					} catch (org.json.simple.parser.ParseException e) {
+					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					try {
+						downloadingFile.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} catch (org.json.simple.parser.ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		}
+		
 	}
+
+
+	
 
 	public static int setChunkSize(long fileSizeRemaining) {
 		// Determine the chunkSize

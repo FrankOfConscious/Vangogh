@@ -37,28 +37,40 @@ public class Math {
 		
 	}
 	private static final Logger log = Logger.getLogger(Logger.class);
-	static JSONArray parseCommand(JSONObject command,DataOutputStream output)  {
+	static JSONArray parseCommand(JSONObject raw,DataOutputStream output)  {
 		JSONArray result = new JSONArray();
+		JSONObject command=new JSONObject();
 		
 		//this solves generic response
-		if (command.containsKey("command")) {
-			switch((String) command.get("command")) {
+		if (raw.containsKey("command")) {
+			switch((String) raw.get("command")) {
 			//each case handles more explicit situation
 			case "PUBLISH":
+				command=preProcess(raw);
 				result=publishJSON(command);
 				System.out.println("Current ResourceList size:"+result.size());///////
 				break;
-			case "REMOVE":result=removeJSON(command);
+			case "REMOVE":
+				command=preProcess(raw);
+				result=removeJSON(command);
 				System.out.println("Current ResourceList size:"+result.size());///////
 				break;
-			case "SHARE":result=shareJSON(command);
+			case "SHARE":
+				command=preProcess(raw);
+				result=shareJSON(command);
 				break;
-			case "QUERY":result=queryJSON(command);
+			case "QUERY":
+				command=preProcess(raw);
+				result=queryJSON(command);
 				break;
-			case "FETCH":result=fetchJSON(command,output);
+			case "FETCH":
+				command=preProcess(raw);
+				result=fetchJSON(command,output);
 				break;
-			case "EXCHANGE":result=exchangeJSON(command);
-				System.out.println("Current server List:"+Server.serverRecords.toString());
+			case "EXCHANGE":
+				command=preProcess(raw);
+				result=exchangeJSON(command);
+				System.out.println("Current server List:"+Server.serverRecords.toString());////////////
 				break;
 			default:
 				//return invalid command
@@ -80,14 +92,216 @@ public class Math {
 		result.add(endOfTag);
 		return result;
 	}
-	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	private static JSONObject preProcess(JSONObject command) {
+		// TODO Auto-generated method stub
+		if(command.containsKey("command")){
+			switch((String)command.get("command")){
+			case("PUBLISH"):{//////////////////////////////////////////////////////////////////////////
+				String name = "";
+				if (command.containsKey("name")){
+					name = (String) command.get("name");
+				}
+				String tags="";
+				if(command.containsKey("tags")){
+					tags=(String) command.get("tags");
+				}
+				String des = "";
+				if (command.containsKey("description")) {
+					des = (String) command.get("description");
+				}
+				String uri = "";
+				if (command.containsKey("uri")) {
+					uri = (String) command.get("uri");
+				}
+				String channel = "";
+				if (command.containsKey("channel")) {
+					channel = (String) command.get("channel");
+				}
+				String owner = "";
+				if (command.containsKey("owner")) {
+					owner = (String) command.get("owner");
+					if(owner.equals(".classpath")) owner="*";
+				}
+				JSONObject resource = new JSONObject();
+				JSONObject commandObj = new JSONObject();
+				resource.put("name", name);
+				resource.put("tags", tags);
+				resource.put("description", des);
+				resource.put("uri", uri);
+				resource.put("channel", channel);
+				resource.put("owner", owner);
+				resource.put("ezserver", null);
+				commandObj.put("command", "PUBLISH");
+				commandObj.put("resource", resource);
+				return commandObj;
+				
+			}
+			case("REMOVE"):{
+				
+				String uri = null;
+				if (command.containsKey("uri")) {
+					uri = (String) command.get("uri");
+				}
+				String channel = null;
+				if (command.containsKey("channel")) {
+					channel = (String) command.get("channel");
+				}
+				String owner = null;
+				if (command.containsKey("owner")) {
+					owner = (String) command.get("owner");
+					if(owner.equals(".classpath")) owner="*";
+				}
+				JSONObject resource = new JSONObject();
+				JSONObject commandObj = new JSONObject();
+				resource.put("uri", uri);
+				resource.put("channel", channel);
+				resource.put("owner", owner);
+				resource.put("ezserver", null);
+				commandObj.put("command", "REMOVE");
+				commandObj.put("resource", resource);
+				return commandObj;
+				
+			}
+			case("SHARE"):{
+				String name = "";
+				if (command.containsKey("name")){
+					name = (String) command.get("name");
+				}
+				String tags="";
+				if(command.containsKey("tags")){
+					tags=(String) command.get("tags");
+				}
+				String des = "";
+				if (command.containsKey("description")) {
+					des = (String) command.get("description");
+				}
+				String uri = null;
+				if (command.containsKey("uri")) {
+					uri = (String) command.get("uri");
+				}
+				String channel = "";
+				if (command.containsKey("channel")) {
+					channel = (String) command.get("channel");
+				}
+				String owner = "";
+				if (command.containsKey("owner")) {
+					owner = (String) command.get("owner");
+					if(owner.equals(".classpath")) owner="*";
+				}
+				String secret = null;
+				if (command.containsKey("secret")) {
+					owner = (String) command.get("secret");
+				}
+				JSONObject resource = new JSONObject();
+				JSONObject commandObj = new JSONObject();
+				resource.put("name", name);
+				resource.put("secret", secret);
+				resource.put("tags", tags);
+				resource.put("description", des);
+				resource.put("uri", uri);
+				resource.put("channel", channel);
+				resource.put("owner", owner);
+				resource.put("ezserver", null);
+				commandObj.put("command", "SHARE");
+				commandObj.put("resource", resource);
+				return commandObj;
+				
+				
+			}
+			case("QUERY"):{
+				String name = "";
+				if (command.containsKey("name")){
+					name = (String) command.get("name");
+				}
+				String tags="";
+				if(command.containsKey("tags")){
+					tags=(String) command.get("tags");
+				}
+				String des = "";
+				if (command.containsKey("description")) {
+					des = (String) command.get("description");
+				}
+				String uri = "";
+				if (command.containsKey("uri")) {
+					uri = (String) command.get("uri");
+				}
+				String channel = "";
+				if (command.containsKey("channel")) {
+					channel = (String) command.get("channel");
+				}
+				String owner = "";
+				if (command.containsKey("owner")) {
+					owner = (String) command.get("owner");
+					if(owner.equals(".classpath")) owner="*";
+				}
+				boolean relay = false;
+				if (command.containsKey("relay")) {
+					relay =command.get("relay").equals("true")?true:false;
+				}
+				JSONObject resourceTemplate = new JSONObject();
+				JSONObject commandObj = new JSONObject();
+				resourceTemplate.put("tags", tags);
+				resourceTemplate.put("name", name);
+				resourceTemplate.put("description", des);
+				resourceTemplate.put("uri", uri);
+				resourceTemplate.put("channel", channel);
+				resourceTemplate.put("owner", owner);
+				resourceTemplate.put("ezserver", null);
+				commandObj.put("command", "QUERY");
+				commandObj.put("relay", relay);
+				commandObj.put("resourceTemplate", resourceTemplate);
+				return commandObj;
+				
+			}
+			//////////////////////////////////////////////////////////////////////jkljkljkljkl
+			case("FETCH"):{
+
+				String uri = null;
+				if (command.containsKey("uri")) {
+					uri = (String) command.get("uri");
+				}
+				String channel = "";
+				if (command.containsKey("channel")) {
+					channel = (String) command.get("channel");
+				}
+				JSONObject resourceTemplate = new JSONObject();
+				JSONObject commandObj = new JSONObject();
+				resourceTemplate.put("uri", uri);
+				resourceTemplate.put("channel", channel);
+				resourceTemplate.put("ezserver", null);
+				commandObj.put("command", "FETCH");
+				commandObj.put("resourceTemplate", resourceTemplate);
+				return commandObj;
+				//////////////////////////////////////////////////////////////////////////////////////////
+			}
+			case("EXCHANGE"):{
+				String serverList ;
+				if (command.containsKey("servers")) {
+					serverList= (String) command.get("servers");
+				}
+				else serverList=null;
+				JSONObject commandObj = new JSONObject();
+
+
+				commandObj.put("command", "EXCHANGE");
+				commandObj.put("serverList", serverList);
+				
+			}
+			
+				
+			}
+		}
+		
+		return null;
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private static JSONArray publishJSON(JSONObject command) {
 	
 		JSONObject result = new JSONObject();
 		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
-				!((HashMap) command.get("resource")).containsKey("owner")||
-				!((HashMap) command.get("resource")).containsKey("channel")||
 				!((HashMap) command.get("resource")).containsKey("uri")){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
@@ -156,10 +370,10 @@ private static JSONArray shareJSON(JSONObject command) {
 		JSONObject result = new JSONObject();
 		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
-				!command.containsKey("secret") ||
-				!((HashMap) command.get("resource")).containsKey("owner")||
-				!((HashMap) command.get("resource")).containsKey("channel")||
-				!((HashMap) command.get("resource")).containsKey("uri")){
+				!command.containsKey("secret") ||((HashMap) command.get("resource")).get("secret")==null||
+				!((HashMap) command.get("resource")).containsKey("uri")||
+				((HashMap) command.get("resource")).get("uri")==null
+				){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource and\\/or secret");
 			array.add(result);
@@ -409,7 +623,10 @@ private static JSONArray shareJSON(JSONObject command) {
 	private static JSONArray fetchJSON(JSONObject command, DataOutputStream output){
 		JSONArray result = new JSONArray();
 		JSONObject obj = new JSONObject();
-		if (!command.containsKey("resourceTemplate")) {
+		if (!command.containsKey("resourceTemplate")||
+				((HashMap) command.get("resourceTemplate")).containsKey("uri")||
+				(String) ((HashMap) command.get("resourceTemplate")).get("uri")==null
+				) {
 			obj.put("response", "error");
 			obj.put("errorMessage", "missing resourceTemplate");
 			result.add(obj);
@@ -433,16 +650,31 @@ private static JSONArray shareJSON(JSONObject command) {
 				System.out.println(uriIns.getPath());
 				File f = new File(uriIns.getPath());
 				if (f.exists()) {
+					JSONObject obj0 = new JSONObject();
 					JSONObject obj1 = new JSONObject();
 					JSONObject obj2 = Server.resourceList.get(i).toJSON();
 					JSONObject obj3 = new JSONObject();
 					
-					obj1.put("response", "success");
+					obj0.put("response", "success");
+				
+					try {
+						output.writeUTF(obj0.toJSONString());
+				
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					obj2.put("resourceSize", f.length());
-					obj3.put("resultSize", 1);
-					result.add(obj1);
-					result.add(obj2);
-					result.add(obj3);
+					try {
+						output.writeUTF(obj2.toJSONString());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+//					obj3.put("resultSize", 1);
+//
+//					result.add(obj3);
 					try{
 						JSONObject fileSize = new JSONObject();
 						fileSize.put("resourceSize", f.length());
@@ -458,6 +690,9 @@ private static JSONArray shareJSON(JSONObject command) {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+					obj3.put("resultSize", 1);
+
+					result.add(obj3);
 					debug(result);
 					return result;
 				}
@@ -476,9 +711,7 @@ private static JSONArray shareJSON(JSONObject command) {
 		JSONObject result= new JSONObject();
 		JSONArray array=new JSONArray();
 		if(
-				((HashMap) command.get("resource")).get("owner")==null||
-				((HashMap) command.get("resource")).get("channel")==null||
-				((HashMap) command.get("resource")).get("uri")==null){
+				(((HashMap) command.get("resource")).get("uri")==null||((HashMap) command.get("resource")).get("uri").equals(""))){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource");
 			array.add(result);
