@@ -280,11 +280,13 @@ import org.json.simple.parser.ParseException;
 						JSONObject exchangeCommand = new JSONObject();
 						String records = "";
 						for (int i = 0; i<serverRecords.size(); i++) {
-							if (i == serverRecords.size() - 1) {
-								records += serverRecords.get(i);
-							} else {
-								records += serverRecords.get(i) + ",";
-							}
+							records += serverRecords.get(i) + ",";
+						}
+						try {
+							records += InetAddress.getLocalHost().getHostAddress() + ":" + port;
+						} catch (UnknownHostException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
 						exchangeCommand.put("command", "EXCHANGE");
 						exchangeCommand.put("serverList", records);
