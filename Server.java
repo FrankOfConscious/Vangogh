@@ -147,13 +147,19 @@ import org.json.simple.parser.ParseException;
 				// Wait for connections.
 				while(true){
 					Socket client = server.accept();
+					
+					if (System.currentTimeMillis() < timeLimit && connected) {
+						continue;
+					}
+					
 					counter++;
 					System.out.println("Client "+counter+": Applying for connection!");
-					
-					
 					// Start a new thread for a connection
 					Thread t = new Thread(() -> serveClient(client));
 					t.start();
+					
+					connected = true;
+					timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
 				}
 				
 			} catch (IOException e) {
