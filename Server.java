@@ -145,6 +145,10 @@ import org.json.simple.parser.ParseException;
 				t2.start();
 				//**********************
 				// Wait for connections.
+				
+				boolean connected = false;
+				long timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
+				
 				while(true){
 					Socket client = server.accept();
 					
