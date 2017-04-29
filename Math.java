@@ -48,12 +48,12 @@ public class Math {
 			case "PUBLISH":
 				command=preProcess(raw);
 				result=publishJSON(command);
-				System.out.println("Current ResourceList size:"+result.size());///////
+//				System.out.println("Current ResourceList size:"+result.size());
 				break;
 			case "REMOVE":
 				command=preProcess(raw);
 				result=removeJSON(command);
-				System.out.println("Current ResourceList size:"+result.size());///////
+//				System.out.println("Current ResourceList size:"+result.size());
 				break;
 			case "SHARE":
 				command=preProcess(raw);
@@ -70,7 +70,7 @@ public class Math {
 			case "EXCHANGE":
 				command=preProcess(raw);
 				result=exchangeJSON(command);
-				System.out.println("Current server List:"+Server.serverRecords.toString());////////////
+//				System.out.println("Current server List:"+Server.serverRecords.toString());
 				break;
 			default:
 				//return invalid command
@@ -134,6 +134,7 @@ public class Math {
 				resource.put("ezserver", null);
 				commandObj.put("command", "PUBLISH");
 				commandObj.put("resource", resource);
+				System.out.println(commandObj.toJSONString());
 				return commandObj;
 				
 			}
@@ -272,6 +273,7 @@ public class Math {
 				resourceTemplate.put("ezserver", null);
 				commandObj.put("command", "FETCH");
 				commandObj.put("resourceTemplate", resourceTemplate);
+				System.out.println("after pre-process:"+commandObj.toJSONString());
 				return commandObj;
 				//////////////////////////////////////////////////////////////////////////////////////////
 			}
@@ -282,20 +284,13 @@ public class Math {
 				}
 				else serverList=null;
 				JSONObject commandObj = new JSONObject();
-
-
 				commandObj.put("command", "EXCHANGE");
 				commandObj.put("serverList", serverList);
-				
+			}				
 			}
-			
-				
-			}
-		}
-		
+		}		
 		return null;
 	}
-	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static JSONArray publishJSON(JSONObject command) {
 	
@@ -312,8 +307,7 @@ public class Math {
 			result.put("response", "error");
 			result.put("errorMessage", "invalid resource");
 			array.add(result);
-			debug(array);
-			
+			debug(array);			
 			return array;
 		} else if(((String)((HashMap) command.get("resource")).get("uri")).equals("")) {
 			//this if clause check if the file scheme is "file"
@@ -325,7 +319,6 @@ public class Math {
 		} else {
 //			System.out.println("file or http::"+(String)((HashMap) command.get("resource")).get("uri"));//////
 			if(   isURI((String)((HashMap) command.get("resource")).get("uri"))){
-//			System.out.println("i am in if");
 				for (int i = 0; i < Server.resourceList.size(); i++) {
 				//this if clause check if there is resource with same channel and uri but different owner
 					if (Server.resourceList.get(i).ifduplicated(command)) {
@@ -343,7 +336,6 @@ public class Math {
 						debug(array);
 						return array;
 				}	
-//					System.out.println("in for");
 			}
 			
 			Server.resourceList.add(new KeyTuple(new Resource(command)));
@@ -454,8 +446,7 @@ private static JSONArray shareJSON(JSONObject command) {
 					// Get I/O streams for connection
 					DataInputStream input2 = new DataInputStream(socket2.getInputStream());
 					DataOutputStream output2 = new DataOutputStream(socket2.getOutputStream());
-//					output2.writeUTF("I am client");
-//					output2.flush();
+
 					try {
 						output2.writeUTF(relaycommand.toJSONString());
 						output2.flush();
@@ -489,7 +480,7 @@ private static JSONArray shareJSON(JSONObject command) {
 							//JSONArray results=message./////////////////////
 							//System.out.println(message);
 						} catch (IOException e) {
-							System.out.println("Server seems to have closed connection.");
+//							System.out.println("Server seems to have closed connection.");
 						}
 					}
 
@@ -624,9 +615,10 @@ private static JSONArray shareJSON(JSONObject command) {
 		JSONArray result = new JSONArray();
 		JSONObject obj = new JSONObject();
 		if (!command.containsKey("resourceTemplate")||
-				((HashMap) command.get("resourceTemplate")).containsKey("uri")||
-				(String) ((HashMap) command.get("resourceTemplate")).get("uri")==null
+				!((HashMap) command.get("resourceTemplate")).containsKey("uri")||
+				((String) ((HashMap) command.get("resourceTemplate")).get("uri"))==null
 				) {
+
 			obj.put("response", "error");
 			obj.put("errorMessage", "missing resourceTemplate");
 			result.add(obj);
@@ -759,26 +751,14 @@ private static JSONArray shareJSON(JSONObject command) {
 			result.add(obj);
 			debug(result);
 			return result;
-		}else {
-	
+		}else {	
 			String serverRecord=checker((String) command.get("serverList"));
 			String [] RecordArray =serverRecord.split(",");
-//			for(int i=0;i<RecordArray.length;i++){
-//				if(!ishostPort(RecordArray[i])){
-//					JSONObject obj=new JSONObject();
-//					obj.put("response", "error");
-//					obj.put("errorMessage", "missing resourceTemplate");
-//					JSONArray result=new JSONArray();
-//					result.add(obj);
-//					return result;
-//				}
-//			}
 			for(int i=0;i<RecordArray.length;i++){
 				String [] hostPort=RecordArray[i].split(":");
 				String hostName=hostPort[0];
 				String port=hostPort[1];
-				if(!isPort(port)){
-			
+				if(!isPort(port)){			
 					JSONObject obj=new JSONObject();
 					obj.put("response", "error");
 					obj.put("errorMessage", "missing resourceTemplate");
@@ -795,9 +775,7 @@ private static JSONArray shareJSON(JSONObject command) {
 					}
 				}
 				if(!exist)
-				Server.serverRecords.add(RecordArray[i]);
-		
-				
+				Server.serverRecords.add(RecordArray[i]);			
 			}
 		}
 		JSONObject obj=new JSONObject();
@@ -805,14 +783,15 @@ private static JSONArray shareJSON(JSONObject command) {
 		JSONArray result=new JSONArray();
 		result.add(obj);
 		debug(result);
-		return result;
-		
+		return result;		
 	}
+	
 	private static String checker(String input){
 		String b=input.replaceAll("\\s", "");
 		 b=b.replace("\0", "");
 		return b;	
 	}
+	
 	 private static boolean isIpv4(String ipAddress) {
 	        String ip = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
 	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
@@ -822,6 +801,7 @@ private static JSONArray shareJSON(JSONObject command) {
 	        Matcher matcher = pattern.matcher(ipAddress);
 	        return matcher.matches();
 	    }
+	 
 	  static boolean ishostPort(String HP) {
 	        String hostPort = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
 	                + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."
@@ -831,14 +811,14 @@ private static JSONArray shareJSON(JSONObject command) {
 	        Matcher matcher = pattern.matcher(HP);
 	        return matcher.matches();
 	    }
-	static boolean isPort(String port) {
+	  static boolean isPort(String port) {
 		 int portNumber =Integer.parseInt(port);
 	        if(portNumber<0||portNumber>65535){
 	        	return false;
 	        }
 	        return true;
 	    }
-	private static boolean isURI(String str){
+	  private static boolean isURI(String str){
 		if(str==null ||str.equals("")) return false;
 		else{
 			int length=str.length();
@@ -849,79 +829,64 @@ private static JSONArray shareJSON(JSONObject command) {
 		}
 		return false;
 	}
-	
-	
-	private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
-		// TODO Auto-generated method stub
-		boolean[] rules=new boolean[11];
-		rules[0]=Tuple.getChannel().equals(((HashMap) command.get("resourceTemplate")).get("channel"));
-		if(!rules[0]) return false;
-		rules[1]= (((HashMap) command.get("resourceTemplate")).get("owner")).equals("") ||Tuple.getOwner().equals("")||Tuple.getOwner().equals(((HashMap) command.get("resourceTemplate")).get("owner"));
-		if(!rules[1]) return false;
-		rules[2]=true;
-		if( !((HashMap) command.get("resourceTemplate")).get("tags").equals("")){
-			if(Tuple.getObj().getTags()==null) {
-				rules[2]=false;
-				return false;
-			}
-			else{
-				String[] tempTags=( (String) ((HashMap) command.get("resourceTemplate")).get("tags")).split(",");
 		
-				for(int j=0;j<tempTags.length;j++){
-					if(!Arrays.asList(Tuple.getObj().getTags()).contains(tempTags[j])){
-						rules[2]=false;
-						return false;
-					}
-				}
-			}
-		}
-		if(!((HashMap) command.get("resourceTemplate")).containsKey("uri")) rules[3]=true;
-		else if(((HashMap) command.get("resourceTemplate")).get("uri").equals("")) rules[3]=true;
-		else {
-			if(((HashMap) command.get("resourceTemplate")).get("uri").equals(Tuple.getUri())) rules[3]=true;
-			else return false;
-		}
-		rules[8]=false;
-		if(!((HashMap) command.get("resourceTemplate")).containsKey("name")) rules[7]=true;
-		else if(((HashMap) command.get("resourceTemplate")).get("name").equals("")) rules[8]=true;
-		else {
-			if(   Tuple.getObj().get("name").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("name")     )  ) {rules[4]=true; return true;}
-			else rules[4]= false;
-		}
-		rules[10]=false;
-		if(!((HashMap) command.get("resourceTemplate")).containsKey("description")) rules[9]=true;
-		else if(((HashMap) command.get("resourceTemplate")).get("description").equals("")) rules[10]=true;
-		else {
-			if(   Tuple.getObj().get("description").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("description")     )  ){rules[5]=true; return true;}
-			else rules[5]= false;
-		}
-		
-		if((rules[7]&&rules[9])||(rules[8]&&rules[10])) {rules[6]=true;return true;}
-		else rules[6]=false;
-		
-		if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;
-		else return false;
-	}
-	private static void debug(JSONArray array) {
-		if(Server.debug){
-			if(array.contains("error")){
-				log.error("SENT:"+array.toJSONString());
-			}else{
-				log.debug("SENT:"+array.toJSONString());
-			}
-		
-		}
-	}
-//	public static void SetLogger(){
-//
-//
-//
-//		log.setLevel(Level.FINE);
-//
-//
-//		log.getHandlers()[0].setLevel(Level.FINE);
-//
-//
-//	}
-	
+	  private static boolean queryMatch(KeyTuple Tuple, JSONObject command) {
+		  
+		  // TODO Auto-generated method stub
+		  boolean[] rules=new boolean[11];
+		  rules[0]=Tuple.getChannel().equals(((HashMap) command.get("resourceTemplate")).get("channel"));
+		  if(!rules[0]) return false;
+		  rules[1]= (((HashMap) command.get("resourceTemplate")).get("owner")).equals("") ||Tuple.getOwner().equals("")||Tuple.getOwner().equals(((HashMap) command.get("resourceTemplate")).get("owner"));
+		  if(!rules[1]) return false;
+		  rules[2]=true;
+		  if( !((HashMap) command.get("resourceTemplate")).get("tags").equals("")){
+			  if(Tuple.getObj().getTags()==null) {
+				  rules[2]=false;
+				  return false;
+			  }
+			  else{
+				  String[] tempTags=( (String) ((HashMap) command.get("resourceTemplate")).get("tags")).split(",");	
+				  for(int j=0;j<tempTags.length;j++){
+					  if(!Arrays.asList(Tuple.getObj().getTags()).contains(tempTags[j])){
+						  rules[2]=false;
+						  return false;
+					  }
+				  }
+			  }
+		  }
+		  if(!((HashMap) command.get("resourceTemplate")).containsKey("uri")) rules[3]=true;
+		  else if(((HashMap) command.get("resourceTemplate")).get("uri").equals("")) rules[3]=true;
+		  else {
+			  if(((HashMap) command.get("resourceTemplate")).get("uri").equals(Tuple.getUri())) rules[3]=true;
+			  else return false;
+		  }
+		  rules[8]=false;
+		  if(!((HashMap) command.get("resourceTemplate")).containsKey("name")) rules[7]=true;
+		  else if(((HashMap) command.get("resourceTemplate")).get("name").equals("")) rules[8]=true;
+		  else {
+			  if(   Tuple.getObj().get("name").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("name")     )  ) {rules[4]=true; return true;}
+			  else rules[4]= false;
+		  }
+		  rules[10]=false;
+		  if(!((HashMap) command.get("resourceTemplate")).containsKey("description")) rules[9]=true;
+		  else if(((HashMap) command.get("resourceTemplate")).get("description").equals("")) rules[10]=true;
+		  else {
+			  if(   Tuple.getObj().get("description").contains(  (String) ((HashMap) command.get("resourceTemplate")).get("description")     )  ){rules[5]=true; return true;}
+			  else rules[5]= false;
+		  }		
+		  if((rules[7]&&rules[9])||(rules[8]&&rules[10])) {rules[6]=true;return true;}
+		  else rules[6]=false;	
+		  if(rules[4]==true ||rules[5]==true||rules[6]==true) return true;
+		  else return false;
+	  }
+	  private static void debug(JSONArray array) {
+		  if(Server.debug){
+			  if(array.contains("error")){
+				  log.error("SENT:"+array.toJSONString());
+			  }else{
+				  log.debug("SENT:"+array.toJSONString());
+			  }	
+		  }
+	  }
+	  
 	}

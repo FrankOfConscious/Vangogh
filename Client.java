@@ -28,10 +28,8 @@ import Server.Server;
 class Client {
 	private static String ip;
 	private static int port;
-	private static boolean debug = false;
-	
+	private static boolean debug = false;	
 	private static final Logger log = Logger.getLogger(Logger.class);
-
 	public static void main(String[] args) {
 		log.info("Client has started.");
 
@@ -61,38 +59,32 @@ class Client {
 			debug = true;
 		}
 		
-		
-
 		// connect to a server socket
 		try (Socket socket = new Socket(ip, port)) {
-
 			// Get I/O streams for connection
 			DataInputStream input = new DataInputStream(socket.getInputStream());
 			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-//			output.writeUTF("I am client");
-//			output.flush();
 			JSONObject raw=new JSONObject();
-
 			if (cmd.hasOption("fetch")) {
 //				JSONFetch(cmd, output, input);
 				raw.put("command", "FETCH");
-			} else {
-				if (cmd.hasOption("publish")) {
-//					JSONPublish(cmd, output);
-					raw.put("command", "PUBLISH");
-				} else if (cmd.hasOption("remove")) {
-//					JSONRemove(cmd, output);
-					raw.put("command", "REMOVE");
-				} else if (cmd.hasOption("share")) {
-//					JSONShare(cmd, output);
-					raw.put("command", "SHARE");
-				} else if (cmd.hasOption("exchange")) {
-//					JSONExchange(cmd, output);
-					raw.put("command", "EXCHANGE");
-				} else if (cmd.hasOption("query")) {
-//					JSONQuery(cmd, output);
-					raw.put("command", "QUERY");
-				}
+			}else if (cmd.hasOption("publish")) {
+//				JSONPublish(cmd, output);
+				raw.put("command", "PUBLISH");
+			} else if (cmd.hasOption("remove")) {
+//				JSONRemove(cmd, output);
+				raw.put("command", "REMOVE");
+			} else if (cmd.hasOption("share")) {
+//				JSONShare(cmd, output);
+				raw.put("command", "SHARE");
+			} else if (cmd.hasOption("exchange")) {
+//				JSONExchange(cmd, output);
+				raw.put("command", "EXCHANGE");
+			} else if (cmd.hasOption("query")) {
+//				JSONQuery(cmd, output);
+				raw.put("command", "QUERY");
+			}
+			
 			if(cmd.hasOption("channel")) raw.put("channel",cmd.getOptionValue("channel") );
 			if(cmd.hasOption("description")) raw.put("description",cmd.getOptionValue("description") );
 			if(cmd.hasOption("name")) raw.put("name",cmd.getOptionValue("name") );
@@ -102,14 +94,15 @@ class Client {
 			if(cmd.hasOption("tags")) raw.put("tags",cmd.getOptionValue("tags") );
 			if(cmd.hasOption("uri")) raw.put("uri",cmd.getOptionValue("uri") );
 			if(cmd.hasOption("relay")) raw.put("relay",cmd.getOptionValue("relay") );
-
 			try{
 				output.writeUTF(raw.toJSONString());
 				output.flush();
+				if(debug){
+					log.info("SEND: "+raw.toJSONString());	
+				}
 			}catch(IOException e){
 				e.printStackTrace();
-				System.exit(0);
-				
+				System.exit(0);			
 			}
 			 boolean fetchFlag=false;
 			try {
@@ -118,11 +111,12 @@ class Client {
 						String message = input.readUTF();
 						if(message.equals("{\"endOfTransmit\":true}")) break;
 						JSONParser parser1=new JSONParser();
-						if(((JSONObject) parser1.parse(message)).containsKey("resourceSize"))
-							
+						if(((JSONObject) parser1.parse(message)).containsKey("resourceSize"))							
 							doFetch(message,input);
-						log.info("RECEIVED: " + message);
-
+						if(debug){log.info("RECEIVED: " + message);}
+						else{
+							log.info(message);
+						}
 					}
 				}
 				input.close();
@@ -131,24 +125,16 @@ class Client {
 					log.warn("Server seems to have closed connection.");
 					System.exit(0);
 				}
-			}
-
 		} catch (Exception e) {
 			log.warn("Server seems to have closed connection.");
 			System.exit(0);
-			//e.printStackTrace();
-			
+			//e.printStackTrace();			
 		}
 	}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	private static void doFetch(String result, DataInputStream input) {
 		// TODO Auto-generated method stub
-		while (true) {
-			
-
-				
+		while (true) {			
 				JSONObject cmd = new JSONObject();
 				try {
 					JSONParser parser = new JSONParser();;
@@ -164,21 +150,15 @@ class Client {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-
 					// Find out how much size is remaining to get from the
-					// server.
-					
+					// server.					
 					long fileSizeRemaining = (Long) cmd.get("resourceSize");
-
 					int chunkSize = setChunkSize(fileSizeRemaining);
-
 					// Represents the receiving buffer
 					byte[] receiveBuffer = new byte[chunkSize];
-
 					// Variable used to read if there are remaining size
 					// left to read.
 					int num;
-
 					try {
 						while ((num = input.read(receiveBuffer)) > 0) {
 							// Write the received bytes into the
@@ -210,28 +190,21 @@ class Client {
 				} catch (org.json.simple.parser.ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-			
+				}			
 		}
 		
 	}
 
-
-	
-
 	public static int setChunkSize(long fileSizeRemaining) {
 		// Determine the chunkSize
 		int chunkSize = 1024 * 1024;
-
 		// If the file size remaining is less than the chunk size
 		// then set the chunk size to be equal to the file size.
 		if (fileSizeRemaining < chunkSize) {
 			chunkSize = (int) fileSizeRemaining;
 		}
-
 		return chunkSize;
 	}
-
 
 	public static void AddOptions(Options options) {
 		options.addOption("port", true, "Server port");
@@ -252,7 +225,6 @@ class Client {
 		options.addOption("tags", true, "resource tags");
 		options.addOption("uri", true, "resource URI");
 		options.addOption("relay", true, "query relay");
-
 	}
 
 }

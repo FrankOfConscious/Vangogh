@@ -13,8 +13,6 @@ class Resource {
 	private String description="";
 	private String[] tags=null;
 	private String ezserver;
-	
-	//用来存储server里创建的Resource obj
 	private static ArrayList<Resource> resourceList = new ArrayList<Resource>();
 	
 	public Resource(String name, String description, String[] tags, String uri, String channel, String owner, String ezserver){
@@ -28,6 +26,7 @@ class Resource {
 		this.owner=checker(owner);
 		this.ezserver=checker(ezserver);	
 	}
+	
 	public Resource(Resource obj){
 		this.name=obj.get("name");
 		this.description=obj.get("description");
@@ -39,19 +38,10 @@ class Resource {
 		else this.owner="*";
 		this.ezserver=Server.advertisedHostName+":"+Server.port;
 	}
-	 JSONObject toJSON(){
+	
+	JSONObject toJSON(){
     	JSONObject obj=new JSONObject();
-    	obj.put("name", this.get("name"));   
-//    	String tagString;
-//		if(this.getTags()==null) { tagString = "[ ]";}
-//    	else{
-//    		tagString="["+this.getTags()[0];
-//    	for(int i=1;i<this.getTags().length;i++){
-//    		tagString+=","+this.getTags()[i];
-//    	}
-//    	tagString+="]";
-//    	}
-    	
+    	obj.put("name", this.get("name"));      	
     	ArrayList<String> tagArray=new ArrayList<String>();
     	if(!(this.getTags()==null)){
     		for(int i=0;i<this.getTags().length;i++){
@@ -63,10 +53,10 @@ class Resource {
     	obj.put("uri", this.get("uri"));
     	obj.put("channel", this.get("channel"));
     	obj.put("owner", this.get("owner"));
-    	obj.put("ezserver", this.get("ezserver"));
+    	obj.put("ezserver", Server.advertisedHostName+":"+Server.port);
     	return obj;
 	}
-	//输入JSONObject，建成的Resource和上面一个方法类似
+	
 	public Resource(JSONObject json) {
 		this.name = checker((String) ((HashMap) json.get("resource")).get("name"));
 		if(((HashMap) json.get("resource")).get("tags").equals("")) this.tags=null;
@@ -75,19 +65,12 @@ class Resource {
 		this.uri= checker((String) ((HashMap) json.get("resource")).get("uri"));
 		this.channel = checker((String) ((HashMap) json.get("resource")).get("channel"));
 		this.owner = checker((String) ((HashMap) json.get("resource")).get("owner"));
-		this.ezserver=Server.advertisedHostName+":"+Server.port;
-		
+		this.ezserver=Server.advertisedHostName+":"+Server.port;		
 	}
-	//根据command创建Resource，并将其存储在resourceList里
+	
 	public static void createResource(JSONObject command) {
 		resourceList.add(new Resource(command));
 	}
-	
-	public void update(Resource obj, String username ){
-		
-		
-	}
-	
 	
 	private static String checker(String input){
 		String b=input.replaceAll("\\s*", "");
@@ -96,12 +79,9 @@ class Resource {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(checker("   abcd  "));
-	
+		System.out.println(checker("   abcd  "));	
 	}
-	
-	
-	
+		
 	String get(String str){
 		switch(str){
 			case "owner": return owner;
@@ -110,11 +90,10 @@ class Resource {
 			case "name":return name;
 			case "description":return description;
 			case "ezserver": return ezserver; 
-			default: return null;
-			
-		}
-		
+			default: return null;			
+		}		
 	}
+	
 	String[] getTags(){
 		return this.tags;
 	}

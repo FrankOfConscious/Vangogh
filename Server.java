@@ -48,12 +48,6 @@ import org.json.simple.parser.ParseException;
 		
 		@SuppressWarnings("deprecation")
 		public static void main(String[] args) throws ParseException, org.apache.commons.cli.ParseException {
-			
-			
-//			setServer(String[] args);
-			
-			
-			//////////////////////////////////////////////////////////////
 			// Parse CMD options
 			//
 			Options options = new Options();
@@ -63,35 +57,54 @@ import org.json.simple.parser.ParseException;
 			CommandLineParser parser = new DefaultParser();
 			CommandLine cmd = null;
 
-			cmd = parser.parse(options, args);
-			if (cmd.hasOption("port")&& Math.isPort(cmd.getOptionValue("port")) ) {
-				
-				port = Integer.parseInt(cmd.getOptionValue("port"));
-				
-	//			advertisedHostName = cmd.getOptionValue("advertisedname");
-			} else {
-				System.out.println("Please provide invalid port options");
+			try{
+				cmd = parser.parse(options, args);
+			}catch(Exception e){
+				System.out.println("Command is invalid or not found. \nPlease check your command and try again.");
 				System.exit(0);
 			}
+			try{
+				if(Math.isPort(cmd.getOptionValue("port")))
+					port = Integer.parseInt(cmd.getOptionValue("port"));
+				else{
+					System.out.println("Please provide valid port( integer:0~65535) arg.");
+					System.exit(0);
+				}
+			}catch(Exception e){
+				System.out.println("Please provide valid port( integer:0~65535) arg.");
+				System.exit(0);
+			}
+			
 			if(cmd.hasOption("connectionintervallimit")){
 				try{
 					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("connectionintervallimit"));
+					if(Integer.parseInt(cmd.getOptionValue("connectionintervallimit"))<0){
+						System.out.println("Please provide valid connection interval limit( positive integer) arg.");
+						System.exit(0);
+					}
 				}catch(Exception e){
-					e.printStackTrace();
+					System.out.println("Please provide valid connection interval limit( positive integer) arg.");
+					System.exit(0);
 				}
 			}else Server.connectionIntervalLimit=1;
 			if(cmd.hasOption("exchangeinterval")){
 				try{
 					Server.exchangeInterval=Integer.parseInt(cmd.getOptionValue("exchangeinterval"));
+					if(Integer.parseInt(cmd.getOptionValue("exchangeinterval"))<0){
+						System.out.println("Please provide valid exchange interval( positive integer) arg.");
+						System.exit(0);
+					}
 				}catch(Exception e){
-					e.printStackTrace();
+					System.out.println("Please provide valid exchange interval( postive integer) arg.");
+					System.exit(0);
 				}
 			}else Server.exchangeInterval=600;
 			if(cmd.hasOption("secret")){
 				try{
 					Server.secret=cmd.getOptionValue("secret");
 				}catch(Exception e){
-					e.printStackTrace();
+					System.out.println("Please provide valid secret(String).");
+					System.exit(0);
 				}
 			}else {
 				Random rand = new Random();
@@ -99,9 +112,10 @@ import org.json.simple.parser.ParseException;
 			}
 			if(cmd.hasOption("advertisedhostname")){
 				try{
-					Server.advertisedHostName=cmd.getOptionValue("advertiedhostname");
+					Server.advertisedHostName=cmd.getOptionValue("advertisedhostname");
 				}catch(Exception e){
-					e.printStackTrace();
+					System.out.println("Please provide valid advertised hostname(String).");
+					System.exit(0);
 				}
 			}else {
 				InetAddress gethost;
@@ -110,19 +124,13 @@ import org.json.simple.parser.ParseException;
 					Server.advertisedHostName=gethost.getHostName();
 				} catch (UnknownHostException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.out.println("Fail to get hostname of OS.\nTry to provide an advertised hostname manually.");
 				} 
 			}
 			if(cmd.hasOption("debug")) {
 				Server.debug=true;
 			}	
 			else debug=false;
-//			System.out.println(Server.advertisedHostName);
-//			System.out.println(Server.connectionIntervalLimit);
-//			System.out.println(Server.exchangeInterval);
-//			System.out.println(Server.port);
-//			System.out.println(Server.secret);
-//			System.out.println(Server.hostname);
 
 			
 			//////////////////////////////////////////////////////////////
@@ -163,8 +171,7 @@ import org.json.simple.parser.ParseException;
 					
 					connected = true;
 					timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
-				}
-				
+				}				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -200,25 +207,17 @@ import org.json.simple.parser.ParseException;
 			    	if(input.available() > 0){
 			    		// Attempt to convert read data to JSON
 			    		JSONObject command = (JSONObject) parser.parse(input.readUTF());
-			    		if(Server.debug){
-			    			log.debug("COMMAND RECEIVED: "+command.toJSONString());//////
-			    		}else{
-			    			System.out.println("COMMAND RECEIVED: "+command.toJSONString());
-			    		}
+//			    		if(Server.debug){
+//			    			log.debug("COMMAND RECEIVED: "+command.toJSONString());//////
+//			    		}else{
+//			    			System.out.println("COMMAND RECEIVED: "+command.toJSONString());
+//			    		}
 			    		JSONArray result = Math.parseCommand(command, output);
 			    		for(int i=0;i<result.size();i++){
 				    		
 				    		output.writeUTF(((JSONObject)result.get(i)).toJSONString());
-				    		output.flush();
-				    		if(Server.debug){
-				    			log.info("What server did:"+result.get(i).toString());/////
-				    		}else{
-				    			System.out.println("What server did:"+result.get(i).toString());/////
-				    		}
+				    		output.flush();	    		
 			    		}
-//			    		output.flush();
-//			    		output.close();
-//			    		input.close();
 			    		break;
 
 			    	}
@@ -241,68 +240,11 @@ import org.json.simple.parser.ParseException;
 			options.addOption("port", true, "server port, an integer");
 			options.addOption("exchangeinterval", true, "exchange interval in seconds");
 			options.addOption("connectionintervallimit", true, "connection interval limit in seconds");
-			options.addOption("advertisehostname", true, "advertised hostname");
+			options.addOption("advertisedhostname", true, "advertised hostname");
 			
 
 		}
-//		private static void setServer(String[] args) {
-//			// TODO Auto-generated method stub
-//			Options options = new Options();
-//			AddOptions(options);
-//
-//			// accept args from CMD
-//			CommandLineParser parser = new DefaultParser();
-//			CommandLine cmd = null;
-//
-//			cmd = parser.parse(options, args);
-//			if (cmd.hasOption("port") ) {
-//				port = Integer.parseInt(cmd.getOptionValue("PORT"));
-//	//			advertisedHostName = cmd.getOptionValue("advertisedname");
-//			} else {
-//				System.out.println("Please provide  PORT options");
-//				System.exit(0);
-//			}
-//			if(cmd.hasOption("connectionintervallimit")){
-//				try{
-//					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("connectionintervallimit"));
-//				}catch(Exception e){
-//					e.printStackTrace();
-//				}
-//			}else Server.connectionIntervalLimit=1;
-//			if(cmd.hasOption("exchangeinterval")){
-//				try{
-//					Server.connectionIntervalLimit=Integer.parseInt(cmd.getOptionValue("exchangeinterval"));
-//				}catch(Exception e){
-//					e.printStackTrace();
-//				}
-//			}else Server.exchangeInterval=600;
-//			if(cmd.hasOption("secret")){
-//				try{
-//					Server.secret=cmd.getOptionValue("secret");
-//				}catch(Exception e){
-//					e.printStackTrace();
-//				}
-//			}else {
-//				Random rand = new Random();
-//				Server.secret=getRandomString(rand.nextInt(10)+20);
-//			}
-//			if(cmd.hasOption("advertisedhostname")){
-//				try{
-//					Server.advertisedHostName=cmd.getOptionValue("advertiedhostname");
-//				}catch(Exception e){
-//					e.printStackTrace();
-//				}
-//			}else {
-//				InetAddress gethost;
-//				try {
-//					gethost = InetAddress.getLocalHost();
-//					Server.advertisedHostName=gethost.getHostName();
-//				} catch (UnknownHostException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} 
-//			}
-//		}
+
 		private static String getRandomString(int length){
 		     String str="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 		     Random random=new Random();
@@ -326,11 +268,11 @@ import org.json.simple.parser.ParseException;
 				public void run() {
 					// TODO Auto-generated method stub
 					if (serverRecords.size() == 0) {
-						System.out.println("No record to share");
+//						System.out.println("No record to share");
 					} else {
-						System.out.println("Ready to exchange my records");
+//						System.out.println("Ready to exchange my records");
 						int selectedIndex = (new Random()).nextInt(serverRecords.size());
-						System.out.println("After random!");
+//						System.out.println("After random!");
 						String host_ip = serverRecords.get(selectedIndex);
 						String[] host_ip_arr = host_ip.split(":");
 						String host_name = host_ip_arr[0];
@@ -350,10 +292,10 @@ import org.json.simple.parser.ParseException;
 						try(Socket randomServer = new Socket(host_name, ip_add)){
 							DataInputStream input = new DataInputStream(randomServer.getInputStream());
 							DataOutputStream output = new DataOutputStream(randomServer.getOutputStream());
-							System.out.println("Ready to share my server records: " + records);
+							//System.out.println("Ready to share my server records: " + records);
 							output.writeUTF(exchangeCommand.toJSONString());
 							output.flush();
-							System.out.println("Command sent");
+//							System.out.println("Command sent");
 							
 							// Time limit for execution
 							long start = System.currentTimeMillis();
@@ -363,17 +305,17 @@ import org.json.simple.parser.ParseException;
 								if (input.available() > 0) {
 									isReachable = true;
 									String result = input.readUTF();
-									System.out.println("Response from other server:" + result);
+									//System.out.println("Response from other server:" + result);
 								}
 							}
 							if (!isReachable) {
 								serverRecords.remove(selectedIndex);
-								System.out.println("Removed unreachable server-" + serverRecords.get(selectedIndex));
+								//System.out.println("Removed unreachable server-" + serverRecords.get(selectedIndex));
 							}
 							
 						} catch (IOException e) {
 							//e.printStackTrace();
-							System.out.println("Record invalid!" + serverRecords.size());
+							//System.out.println("Record invalid!" + serverRecords.size());
 							serverRecords.remove(selectedIndex);
 						}
 					}
