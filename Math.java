@@ -5,9 +5,11 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -758,6 +760,14 @@ private static JSONArray shareJSON(JSONObject command) {
 				String [] hostPort=RecordArray[i].split(":");
 				String hostName=hostPort[0];
 				String port=hostPort[1];
+				try{
+					if(hostName == InetAddress.getLocalHost().getHostAddress() && port == String.valueOf(Server.port)) {
+						continue;
+					}
+				} catch (UnknownHostException e1) {
+					e1.printStackTrace();
+				}
+				
 				if(!isPort(port)){			
 					JSONObject obj=new JSONObject();
 					obj.put("response", "error");
