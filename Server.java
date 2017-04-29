@@ -268,11 +268,11 @@ import org.json.simple.parser.ParseException;
 				public void run() {
 					// TODO Auto-generated method stub
 					if (serverRecords.size() == 0) {
-//						System.out.println("No record to share");
+						System.out.println("No record to share");
 					} else {
-//						System.out.println("Ready to exchange my records");
+						System.out.println("Ready to exchange my records");
 						int selectedIndex = (new Random()).nextInt(serverRecords.size());
-//						System.out.println("After random!");
+						System.out.println("After random!");
 						String host_ip = serverRecords.get(selectedIndex);
 						String[] host_ip_arr = host_ip.split(":");
 						String host_name = host_ip_arr[0];
@@ -294,10 +294,10 @@ import org.json.simple.parser.ParseException;
 						try(Socket randomServer = new Socket(host_name, ip_add)){
 							DataInputStream input = new DataInputStream(randomServer.getInputStream());
 							DataOutputStream output = new DataOutputStream(randomServer.getOutputStream());
-							//System.out.println("Ready to share my server records: " + records);
+							System.out.println("Ready to share my server records: " + records);
 							output.writeUTF(exchangeCommand.toJSONString());
 							output.flush();
-//							System.out.println("Command sent");
+							System.out.println("Command sent");
 							
 							// Time limit for execution
 							long start = System.currentTimeMillis();
@@ -307,12 +307,12 @@ import org.json.simple.parser.ParseException;
 								if (input.available() > 0) {
 									isReachable = true;
 									String result = input.readUTF();
-									//System.out.println("Response from other server:" + result);
+									System.out.println("Response from other server:" + result);
 								}
 							}
 							if (!isReachable) {
 								serverRecords.remove(selectedIndex);
-								//System.out.println("Removed unreachable server-" + serverRecords.get(selectedIndex));
+								System.out.println("Removed unreachable server-" + serverRecords.get(selectedIndex));
 							}
 							
 						} catch (IOException e) {

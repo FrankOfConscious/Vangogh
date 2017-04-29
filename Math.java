@@ -288,6 +288,7 @@ public class Math {
 				JSONObject commandObj = new JSONObject();
 				commandObj.put("command", "EXCHANGE");
 				commandObj.put("serverList", serverList);
+				return commandObj;
 			}				
 			}
 		}		
@@ -648,6 +649,7 @@ private static JSONArray shareJSON(JSONObject command) {
 					JSONObject obj1 = new JSONObject();
 					JSONObject obj2 = Server.resourceList.get(i).toJSON();
 					JSONObject obj3 = new JSONObject();
+					JSONObject obj4 = new JSONObject();
 					
 					obj0.put("response", "success");
 				
@@ -666,7 +668,23 @@ private static JSONArray shareJSON(JSONObject command) {
 						e1.printStackTrace();
 					}
 					
-//					obj3.put("resultSize", 1);
+					obj3.put("resultSize", 1);
+					try {
+						output.writeUTF(obj3.toJSONString());
+						output.flush();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					obj4.put("endOfTransmit",true);
+					try {
+						output.writeUTF(obj4.toJSONString());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+					
 //
 //					result.add(obj3);
 					try{
@@ -684,10 +702,6 @@ private static JSONArray shareJSON(JSONObject command) {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					obj3.put("resultSize", 1);
-
-					result.add(obj3);
-					debug(result);
 					return result;
 				}
 				
@@ -745,6 +759,7 @@ private static JSONArray shareJSON(JSONObject command) {
 			
 		}
 	private static JSONArray exchangeJSON(JSONObject command){
+		System.out.println("aaaaaaaaaa"+command.toJSONString());
 		if((!command.containsKey("serverList"))||(command.get("serverList")==null)){
 			JSONObject obj=new JSONObject();
 			obj.put("response", "error");
@@ -761,12 +776,12 @@ private static JSONArray shareJSON(JSONObject command) {
 				String hostName=hostPort[0];
 				String port=hostPort[1];
 				try{
-					if(hostName == InetAddress.getLocalHost().getHostAddress() && port == String.valueOf(Server.port)) {
-						continue;
-					}
-				} catch (UnknownHostException e1) {
-					e1.printStackTrace();
-				}
+ 					if(hostName == InetAddress.getLocalHost().getHostAddress() && port == String.valueOf(Server.port)) {
+ 						continue;
+ 					}
+ 				} catch (UnknownHostException e1) {
+ 					e1.printStackTrace();
+ 				}
 				
 				if(!isPort(port)){			
 					JSONObject obj=new JSONObject();

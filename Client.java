@@ -31,7 +31,7 @@ class Client {
 	private static boolean debug = false;	
 	private static final Logger log = Logger.getLogger(Logger.class);
 	public static void main(String[] args) {
-		log.info("Client has started.");
+//		log.info("Client has started.");
 
 		// Parse CMD options
 		Options options = new Options();
@@ -44,21 +44,25 @@ class Client {
 		try {
 			cmd = parser.parse(options, args);
 		} catch (ParseException e) {
-			System.out.println("It's not an internal or external command.");
-			//e.printStackTrace();
+			System.out.println("Command is invalid or not found. \nPlease check your command and try again.");
 			System.exit(0);
 		}
-		if (cmd.hasOption("port") && cmd.hasOption("ip")) {
+		try{
 			port = Integer.parseInt(cmd.getOptionValue("port"));
+			if(port>65535||port<0){
+				System.out.println("Port or IP is invalid.\nPlease provid valid port and ip args.");
+				System.exit(0);
+			}
 			ip = cmd.getOptionValue("ip");
-		} else {
-			log.warn("Please provide IP and PORT options");
+			
+		}catch(Exception e){
+			log.warn("Port or IP is invalid.\nPlease provid valid port and ip args.");
 			System.exit(0);
 		}
 		if(cmd.hasOption("debug")) {
 			debug = true;
 		}
-		
+		log.info("Client has started.");
 		// connect to a server socket
 		try (Socket socket = new Socket(ip, port)) {
 			// Get I/O streams for connection
@@ -106,19 +110,34 @@ class Client {
 			}
 			 boolean fetchFlag=false;
 			try {
+				long startTime=System.currentTimeMillis();
+				boolean timeoutFlag=true;
+				String fetchMessage = null;
 				while(true){
+					
 					if(input.available()>0){
+						timeoutFlag=false;
 						String message = input.readUTF();
 						if(message.equals("{\"endOfTransmit\":true}")) break;
 						JSONParser parser1=new JSONParser();
-						if(((JSONObject) parser1.parse(message)).containsKey("resourceSize"))							
-							doFetch(message,input);
-						if(debug){log.info("RECEIVED: " + message);}
+						if(debug){
+							log.info("RECEIVED: " + message);}
 						else{
-							log.info(message);
-						}
+							log.info(message);}
+						if(((JSONObject) parser1.parse(message)).containsKey("resourceSize"))
+							fetchMessage=message;
+							
+//						if(debug){log.info("RECEIVED: " + message);}
+//						else{
+//							log.info(message);
+//						}
+					}
+					if(timeoutFlag&&(System.currentTimeMillis()-startTime)/1000>=5){
+						System.out.println("Time out.\nClient has exited.");
+						System.exit(0);
 					}
 				}
+				if(fetchMessage!=null) doFetch(fetchMessage,input);
 				input.close();
 				output.close();
 			} catch (IOException e) {
