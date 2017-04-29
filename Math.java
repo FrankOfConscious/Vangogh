@@ -191,12 +191,12 @@ public class Math {
 				}
 				String secret = null;
 				if (command.containsKey("secret")) {
-					owner = (String) command.get("secret");
+					secret = (String) command.get("secret");
 				}
 				JSONObject resource = new JSONObject();
 				JSONObject commandObj = new JSONObject();
 				resource.put("name", name);
-				resource.put("secret", secret);
+				commandObj.put("secret", secret);
 				resource.put("tags", tags);
 				resource.put("description", des);
 				resource.put("uri", uri);
@@ -370,9 +370,9 @@ private static JSONArray shareJSON(JSONObject command) {
 		JSONObject result = new JSONObject();
 		JSONArray array=new JSONArray();
 		if(!command.containsKey("resource")||
-				!command.containsKey("secret") ||((HashMap) command.get("resource")).get("secret")==null||
+				!command.containsKey("secret") ||(command.get("secret")==null||
 				!((HashMap) command.get("resource")).containsKey("uri")||
-				((HashMap) command.get("resource")).get("uri")==null
+				((HashMap) command.get("resource")).get("uri")==null)
 				){
 			result.put("response", "error");
 			result.put("errorMessage", "missing resource and\\/or secret");

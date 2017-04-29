@@ -145,25 +145,15 @@ import org.json.simple.parser.ParseException;
 				t2.start();
 				//**********************
 				// Wait for connections.
-				
-				boolean connected = false;
-				long timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
-				
 				while(true){
 					Socket client = server.accept();
-					
-					if (System.currentTimeMillis() < timeLimit && connected) {
-						continue;
-					}
-					
 					counter++;
 					System.out.println("Client "+counter+": Applying for connection!");
+					
+					
 					// Start a new thread for a connection
 					Thread t = new Thread(() -> serveClient(client));
 					t.start();
-					
-					connected = true;
-					timeLimit = System.currentTimeMillis() + connectionIntervalLimit*1000;
 				}
 				
 			} catch (IOException e) {
@@ -233,73 +223,7 @@ import org.json.simple.parser.ParseException;
 			}
 		}
 
-		private static Integer parseCommand(JSONObject command, DataOutputStream output) {
-			
-			int result = 0;
-			
-			if(command.get("command_name").equals("Math")){
-				Math math = new Math();
-				Integer firstInt = Integer.parseInt(command.get("first_integer").toString());
-				Integer secondInt = Integer.parseInt(command.get("second_integer").toString());
-				
-				switch((String) command.get("method_name")){
-					case "add":
-						result = math.add(firstInt,secondInt);
-						break;
-					case "multiply":
-						result = math.multiply(firstInt,secondInt);
-						break;
-					case "subtract":
-						result = math.subtract(firstInt,secondInt);
-						break;
-					default:
-						// Really bad design!!
-						try {
-							throw new Exception();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-				}
-			}
-			
-			// This section deals with the file handler
-			else if(command.get("command_name").equals("GET_FILE")){
-				String fileName = (String) command.get("file_name");
-				// Check if file exists
-				File f = new File("server_files/"+fileName);
-				if(f.exists()){
-					
-					// Send this back to client so that they know what the file is.
-					JSONObject trigger = new JSONObject();
-					trigger.put("command_name", "SENDING_FILE");
-					trigger.put("file_name","sauron.jpg");
-					trigger.put("file_size",f.length());
-					try {
-						// Send trigger to client
-						output.writeUTF(trigger.toJSONString());
-						
-						// Start sending file
-						RandomAccessFile byteFile = new RandomAccessFile(f,"r");
-						byte[] sendingBuffer = new byte[1024*1024];
-						int num;
-						// While there are still bytes to send..
-						while((num = byteFile.read(sendingBuffer)) > 0){
-							System.out.println(num);
-							output.write(Arrays.copyOf(sendingBuffer, num));
-						}
-						byteFile.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				else{
-					// Throw an error here..
-				}
-			}
-			// TODO Auto-generated method stub
-			return result;
-		}
+
 		
 		////////to update
 		public static void AddOptions(Options options) {
