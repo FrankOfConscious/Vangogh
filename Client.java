@@ -102,7 +102,7 @@ class Client {
 				output.writeUTF(raw.toJSONString());
 				output.flush();
 				if(debug){
-					log.info("SEND: "+raw.toJSONString());	
+					log.info("SENT: "+raw.toJSONString());	
 				}
 			}catch(IOException e){
 				e.printStackTrace();
@@ -111,12 +111,13 @@ class Client {
 			 boolean fetchFlag=false;
 			try {
 				long startTime=System.currentTimeMillis();
-				boolean timeoutFlag=true;
+//				boolean timeoutFlag=true;
 				String fetchMessage = null;
 				while(true){
 					
 					if(input.available()>0){
-						timeoutFlag=false;
+						startTime=System.currentTimeMillis();
+//						timeoutFlag=false;
 						String message = input.readUTF();
 						if(message.equals("{\"endOfTransmit\":true}")) break;
 						JSONParser parser1=new JSONParser();
@@ -132,7 +133,7 @@ class Client {
 //							log.info(message);
 //						}
 					}
-					if(timeoutFlag&&(System.currentTimeMillis()-startTime)/1000>=5){
+					if((System.currentTimeMillis()-startTime)/1000>=5){
 						System.out.println("Time out.\nClient has exited.");
 						System.exit(0);
 					}
@@ -153,7 +154,7 @@ class Client {
 	
 	private static void doFetch(String result, DataInputStream input) {
 		// TODO Auto-generated method stub
-		while (true) {			
+					
 				JSONObject cmd = new JSONObject();
 				try {
 					JSONParser parser = new JSONParser();;
@@ -210,7 +211,7 @@ class Client {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}			
-		}
+		
 		
 	}
 

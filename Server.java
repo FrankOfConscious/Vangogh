@@ -196,17 +196,20 @@ import org.json.simple.parser.ParseException;
 //			    output.writeUTF("Server: Hi Client "+counter+" !!!");
 			    
 			    // Receive more data..
-			    if(Server.debug){
+		
 					log.info("Starting the EZshare Server");
 					log.info("using secret: "+Server.secret);
 					log.info("using advertiesd hostname: "+advertisedHostName);
-					log.info("bound to port"+port);
+					log.info("bound to port "+port);
 					log.info("started");
-					}
+					
 			    while(true){
 			    	if(input.available() > 0){
 			    		// Attempt to convert read data to JSON
 			    		JSONObject command = (JSONObject) parser.parse(input.readUTF());
+			    		if(debug){
+			    			log.debug("RECIEVED: "+command.toJSONString());
+			    		}
 //			    		if(Server.debug){
 //			    			log.debug("COMMAND RECEIVED: "+command.toJSONString());//////
 //			    		}else{
@@ -216,7 +219,11 @@ import org.json.simple.parser.ParseException;
 			    		for(int i=0;i<result.size();i++){
 				    		
 				    		output.writeUTF(((JSONObject)result.get(i)).toJSONString());
-				    		output.flush();	    		
+				    		output.flush();	
+				    		if(debug){
+				    			log.debug("SENT: "+((JSONObject) result.get(i)).toJSONString());
+				    		}
+				    			
 			    		}
 			    		break;
 
@@ -297,7 +304,8 @@ import org.json.simple.parser.ParseException;
 							System.out.println("Ready to share my server records: " + records);
 							output.writeUTF(exchangeCommand.toJSONString());
 							output.flush();
-							System.out.println("Command sent");
+							
+							//System.out.println("Command sent");
 							
 							// Time limit for execution
 							long start = System.currentTimeMillis();

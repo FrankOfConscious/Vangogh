@@ -655,6 +655,9 @@ private static JSONArray shareJSON(JSONObject command) {
 				
 					try {
 						output.writeUTF(obj0.toJSONString());
+						if(Server.debug){
+							log.debug("SENT: "+obj0.toJSONString());
+						}
 				
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -663,6 +666,9 @@ private static JSONArray shareJSON(JSONObject command) {
 					obj2.put("resourceSize", f.length());
 					try {
 						output.writeUTF(obj2.toJSONString());
+						if(Server.debug){
+							log.debug("SENT: "+obj2.toJSONString());
+						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -671,6 +677,9 @@ private static JSONArray shareJSON(JSONObject command) {
 					obj3.put("resultSize", 1);
 					try {
 						output.writeUTF(obj3.toJSONString());
+						if(Server.debug){
+							log.debug("SENT: "+obj3.toJSONString());
+						}
 						output.flush();
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -679,6 +688,9 @@ private static JSONArray shareJSON(JSONObject command) {
 					obj4.put("endOfTransmit",true);
 					try {
 						output.writeUTF(obj4.toJSONString());
+						if(Server.debug){
+							log.debug("SENT: "+obj4.toJSONString());
+						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -737,10 +749,10 @@ private static JSONArray shareJSON(JSONObject command) {
 				
 				if(Server.resourceList.get(i).ifOverwrites(command)){
 					Server.resourceList.remove(i);
-					System.out.println("resourceList:"+Server.resourceList.size());
-					for(int k=0;k<Server.resourceList.size();k++){
-						System.out.println(Server.resourceList.get(k).getUri());
-					}
+//					System.out.println("resourceList:"+Server.resourceList.size());
+//					for(int k=0;k<Server.resourceList.size();k++){
+//						System.out.println(Server.resourceList.get(k).getUri());
+//					}
 					result.put("response", "success");
 					removed=true;
 					break;
